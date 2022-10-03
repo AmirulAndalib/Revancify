@@ -7,63 +7,22 @@ trap revive SIGINT
 
 # For update change this sentence here ...
 
-clear
-rm -rf ./*cache
-
-if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ "$(find ~/../usr/lib/ -name "wheel" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "requests" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "bs4" | wc -l)" != "0" ] && [ -e ~/../usr/bin/revancify ] 
-then
-    :
-else
-    echo "Installing dependencies..."
-    sleep 0.5s
-    git pull
-    pkg update -y &&
-    pkg install python openjdk-17 wget ncurses-utils dialog jq -y
-    pip install --upgrade pip
-    pip install wheel
-    pip install requests bs4
-    cp revancify ~/../usr/bin
-    sed -i 's/# allow-external-apps = true/allow-external-apps = true/g' ~/.termux/termux.properties
-    sleep 0.5s
-    echo "Dependencies installed successfully."
-    sleep 0.5s
-    echo "Run this script again"
-    cd ~ || exit
-    exit
-fi
-
-if wget -q --spider http://google.com
-then
-    :
-else
-    echo "Oops, No internet"
-    sleep 0.5s
-    echo "Connect to internet and try again."
-    cd ~ || exit
-    tput cnorm
-    exit
-fi
-
 intro()
 {
     tput civis
-    tput cs 7 $LINES
+    tput cs 5 $LINES
     leave1=$(($(($(tput cols) - 34)) / 2))
-    tput cm 0 $leave1
-    echo "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█"
     tput cm 1 $leave1
+    echo "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█"
+    tput cm 2 $leave1
     echo "█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░"
-    echo ""
-    leave2=$(($(($(tput cols) - 40)) / 2))
-    tput cm 3 $leave2
-    echo "█▄▄ █▄█    █▀▄ █▀▀ █▀▀ █ █▀█ █░█ █▀▀ █▀█"
-    tput cm 4 $leave2
-    echo "█▄█ ░█░    █▄▀ ██▄ █▄▄ █ █▀▀ █▀█ ██▄ █▀▄"
-    echo ""
-    tput cm 8 0
+    tput cm 5 0
     tput sc
 }
 
+leavecols=$(($(($(tput cols) - 38)) / 2))
+fullpagewidth=$(tput cols )
+fullpageheight=$(($(tput lines) - 5 ))
 get_components(){
 
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
@@ -166,40 +125,15 @@ get_components(){
 
     # Fetch patches
     python3 ./python-utils/fetch-patches.py
+    mainmenu
 }
 
 intro
 
-echo "Checking for update..."
-git config pull.rebase true
-sleep 0.5s
-
-if [ "$(git pull)" != "Already up to date." ]
-then
-    cp dialog-config.txt ~/.dialogrc
-    cp revancify ~/../usr/bin/revancify
-    tput rc; tput ed
-    echo Revancify updated...
-    sleep 0.5s
-    echo Run this script again
-    sleep 0.5s
-    tput cnorm
-    cd ~ || exit
-    exit
-else
-    echo ""
-    echo "Script already up to date."
-    sleep 0.5s
-    tput rc; tput ed
-    get_components
-fi
-grep -q decipher ~/.dialogrc || cp dialog-config.txt ~/.dialogrc
-grep -q flag ~/../usr/bin/revancify || cp revancify ~/../usr/bin/revancify
-
 
 selectapp()
 {
-    selectapp=$(dialog --backtitle "Revancify" --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" 12 30 10 1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok" 2>&1> /dev/tty)
+    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok" 2>&1> /dev/tty)
     exitstatus=$?
     if [ "$exitstatus" -eq "0" ]
     then
@@ -240,7 +174,7 @@ selectpatches()
         read -r -a eachline <<< "$line"
         patches+=("${eachline[@]}")
     done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname) \(.status)"' patches.json)
-    mapfile -t choices < <(dialog --backtitle "Revancify" --title 'Patch Selection Menu' --no-items --ascii-lines --ok-label "Save" --no-cancel --separate-output --checklist "Select patches to include" 20 45 10 "${patches[@]}" 2>&1 >/dev/tty)
+    mapfile -t choices < <(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patch Selection Menu' --no-items --ascii-lines --ok-label "Save" --no-cancel --separate-output --checklist "Select patches to include" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty)
     tmp=$(mktemp)
     jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json | jq 'map(select(IN(.patchname; $ARGS.positional[])).status = "on")' --args "${choices[@]}" > "$tmp" && mv "$tmp" ./patches.json
     mainmenu
@@ -252,7 +186,7 @@ patchoptions()
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
-    dialog --backtitle "Revancify" --ascii-lines --title "Options File Editor" --editbox options.toml 22 50 2> "$tmp" && mv "$tmp" ./options.toml
+    dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --ascii-lines --title "Options File Editor" --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
     clear
     mainmenu
@@ -261,7 +195,7 @@ patchoptions()
 mainmenu()
 {
     tput rc; tput ed
-    mainmenu=$(dialog --backtitle "Revancify" --title 'Select App' --ascii-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" 12 30 10 1 "Patch App" 2 "Select Patches" 3 "Edit Patch Options" 2>&1> /dev/tty)
+    mainmenu=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --ascii-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Edit Patch Options" 4 "Update Resources" 2>&1> /dev/tty)
     exitstatus=$?
     if [ "$exitstatus" -eq "0" ]
     then
@@ -274,6 +208,11 @@ mainmenu()
         elif [ "$mainmenu" -eq "3" ]
         then
             patchoptions
+        elif [ "$mainmenu" -eq "4" ]
+        then
+            clear
+            intro
+            get_components
         fi
     elif [ "$exitstatus" -ne "0" ]
     then
@@ -281,114 +220,15 @@ mainmenu()
     fi
 }
 
-
-
-arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
-
-
-mainmenu
-
-# App Downloader
-app_dl()
+mountapk()
 {
-    if ls ./"$1"-* > /dev/null 2>&1
+    if [ "$pkgname" = "com.google.android.youtube" ]
     then
-        app_available=$(basename "$1"-* .apk | cut -d '-' -f 2) #get version
-        if [ "$2" = "$app_available" ];then
-            echo "Latest $1 apk already exists."
-            echo ""
-            sleep 0.5s
-            wget -q -c "$3" -O "$1"-"$2".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            sleep 0.5s
-            tput rc; tput ed
-        else
-            echo "$1 update available !!"
-            sleep 0.5s
-            tput rc; tput ed
-            echo "Removing previous $1 apk..."
-            rm $1-*.apk
-            sleep 0.5s
-            tput rc; tput ed
-            echo "Downloading latest $1 apk..."
-            echo " "
-            wget -q -c "$3" -O "$1"-"$2".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            sleep 0.5s
-            tput rc; tput ed
-        fi
-    else
-        echo "No $1 apk found in Current Directory"
-        echo " "
-        echo "Downloading latest $1 apk..."
-        echo " "
-        wget -q -c "$3" -O "$1"-"$2".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-        sleep 0.5s
-        tput rc; tput ed
-    fi
-}
-
-excludepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "off"))[].patchname' patches.json | sed "s/^/-e /g"))
-
-
-#Build apps
-if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
-then
-    if su -c exit > /dev/null 2>&1
-    then
-        su -c 'mkdir -p /data/adb/revanced'
-        su -c 'chmod -R 777 /data/adb/revanced'
-        if su -c ls /data/adb/service.d | grep -q mount_revanced_com.google.android.youtube.sh && su -c ls /data/adb/service.d | grep -q mount_revanced_com.google.android.apps.youtube.music.sh
-        then
-            :
-        else
-            su -c cp mount_revanced_com.google.android.youtube.sh /data/adb/service.d/
-            su -c chmod +x /data/adb/service.d/mount_revanced_com.google.android.youtube.sh
-            su -c cp mount_revanced_com.google.android.apps.youtube.music.sh /data/adb/service.d/
-            su -c chmod +x /data/adb/service.d/mount_revanced_com.google.android.apps.youtube.music.sh
-        fi
-        if su -c dumpsys package $pkgname | grep -q path
-        then
-            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
-        else
-            sleep 0.5s
-            echo "Oh No, YouTube is not installed"
-            echo ""
-            sleep 0.5s
-            echo "Install YouTube from PlayStore and run this script again."
-            tput cnorm
-            cd ~ || exit
-            exit
-        fi
-        
-    else
-        mkdir -p /storage/emulated/0/Revancify
-        chmod -R 777 /storage/emulated/0/Revancify/
-        mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-        appver=$(dialog --backtitle "Revancify" --title "Version Selection Menu" --no-items --no-cancel --ascii-lines --ok-label "Select" --menu "Choose App Version" 20 40 10 "${appverlist[@]}" 2>&1> /dev/tty)
-
-        if dialog --backtitle "Revancify" --title 'MicroG' --no-items --defaultno --ascii-lines --yesno "Download MicroG?" 8 30
-        then
-            clear
-            wget -q -c "https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk" -O "Vanced_MicroG.apk" --show-progress
-            echo ""
-            mv "Vanced_MicroG.apk" /storage/emulated/0/Revancify
-            echo MicroG App saved to Revancify folder.
-        fi
-    fi
-    clear
-    intro
-    echo "Please wait fetching link ..."
-    getlink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver")
-    tput rc; tput ed
-    app_dl "$appname" "$appver" "$getlink" &&
-    echo "Building $appname Revanced..."
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $excludepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk --custom-aapt2-binary ./aapt2_"$arch" --options options.toml --experimental
-    rm -rf revanced-cache
-
-    if su -c exit > /dev/null 2>&1
-    then
-        mv "$appname"Revanced-"$appver".apk "$pkgname".apk
-        echo "Mounting the app"
-        if su -mm -c 'pkgname=$( ls /data/data/com.termux/files/home/storage/Revancify | grep '^com.google.android' | sed 's/.apk//g' ) && stockapp=$(pm path $pkgname | grep base | sed 's/package://g') && grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | xargs -r umount -l > /dev/null 2>&1; done && rm /data/adb/revanced/"$pkgname".apk > /dev/null 2>&1 && mv "$pkgname".apk /data/adb/revanced && revancedapp=/data/adb/revanced/"$pkgname".apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp"; mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit'
+        echo "Unmounting YouTube..."
+        su -c 'grep com.google.android.youtube /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done && am force-stop com.google.android.youtube'
+        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.youtube.apk"
+        echo "Mounting YouTube Revanced ..."
+        if su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube && exit'
         then
             echo "Mounting successful"
             tput cnorm && cd ~ && exit
@@ -398,37 +238,218 @@ then
             echo "Exiting the script"
             tput cnorm && cd ~ && exit
         fi
+    elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
+    then
+        echo "Unmounting YouTube Music ..."
+        su -mm -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
+        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk && am force-stop com.google.android.apps.youtube.music"
+        echo "Mounting YouTube Music Revanced ..."
+        if su -c -mm 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit'
+        then
+            echo "Mounting successful"
+            tput cnorm && cd ~ && exit
+        
+        else
+            echo "Mount failed..."
+            echo "Exiting the script"
+            tput cnorm && cd ~ && exit
+        fi
+    fi
+    tput cnorm
+    rm -rf ./*cache
+    cd ~ || exit
+    exit
+}
+
+moveapk()
+{
+    mkdir -p /storage/emulated/0/Revancify
+    mv "$appname"Revanced* /storage/emulated/0/Revancify/ &&
+    echo "$appname App saved to Revancify folder." &&
+    echo "Thanks for using Revancify..." &&
+    [[ -f Vanced_MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced_MicroG.apk
+    termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
+}
+
+
+dlmicrog()
+{
+    if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'MicroG Prompt' --no-items --defaultno --ascii-lines --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YouTube Music won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
+        then
+            clear
+            wget -q -c "https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk" -O "Vanced_MicroG.apk" --show-progress
+            echo ""
+            mv "Vanced_MicroG.apk" /storage/emulated/0/Revancify
+            echo MicroG App saved to Revancify folder.
+    fi
+}
+
+checkpatched()
+{
+    if su -c exit > /dev/null 2>&1
+    then
+        if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
+        then
+            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --ascii-lines --yesno "Current directory contains a patched apk. Do You still want to patch?" $fullpageheight $fullpagewidth
+            then
+                rm ./"$appname"Revanced-"$appver"*
+            else
+                clear
+                intro
+                mountapk
+            fi
+        fi
     else
-        mv "$appname"Revanced* /storage/emulated/0/Revancify/ &&
-        sleep 0.5s
-        echo "$appname App saved to Revancify folder." &&
-        echo "Thanks for using Revancify..." &&
-        [[ -f Vanced_MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced_MicroG.apk
-        termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
+        if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
+        then
+            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --ascii-lines --yesno "Patched $appname with version $appver already exists. Do You still want to patch?" $fullpageheight $fullpagewidth
+            then
+                :
+            else
+                clear
+                intro
+                termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
+                tput cnorm
+                rm -rf ./*cache
+                cd ~ || exit
+                exit
+            fi
+        fi
     fi
 
-else
-    mkdir -p /storage/emulated/0/Revancify
-    chmod -R 777 /storage/emulated/0/Revancify/
-    mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    appver=$(dialog --backtitle "Revancify" --title "Version Selection Menu" --no-items --no-cancel --ascii-lines --ok-label "Select" --menu "Select App Version" 20 40 10 "${appverlist[@]}" 2>&1> /dev/tty)
+}
+
+arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
+
+
+mainmenu
+
+sucheck()
+{
+    if su -c exit > /dev/null 2>&1
+    then
+        su -c "mkdir -p /data/adb/revanced"
+        if su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
+        then
+            :
+        else
+            su -c "cp mount_revanced_com.google.android.youtube.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.youtube.sh"
+            su -c "cp mount_revanced_com.google.android.apps.youtube.music.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.apps.youtube.music.sh"
+        fi
+        if su -c "dumpsys package $pkgname" | grep -q path
+        then
+            :
+        else
+            sleep 0.5s
+            echo "Oh No, $appname is not installed"
+            echo ""
+            sleep 0.5s
+            echo "Install $appname from PlayStore and run this script again."
+            tput cnorm
+            cd ~ || exit
+            exit
+        fi
+    else
+        dlmicrog
+    fi
+}
+
+# App Downloader
+app_dl()
+{
+    if ls ./"$appname"-* > /dev/null 2>&1
+    then
+        app_available=$(basename "$appname"-* .apk | cut -d '-' -f 2) #get version
+        if [ "$appver" = "$app_available" ]
+        then
+            echo "Latest $appname apk already exists."
+            echo ""
+            sleep 0.5s
+            wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            sleep 0.5s
+            tput rc; tput ed
+        else
+            echo "$appname update available !!"
+            sleep 0.5s
+            tput rc; tput ed
+            echo "Removing previous $appname apk..."
+            rm $appname-*.apk
+            sleep 0.5s
+            tput rc; tput ed
+            echo "Downloading latest $appname apk..."
+            echo " "
+            wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            sleep 0.5s
+            tput rc; tput ed
+        fi
+    else
+        echo "No $appname apk found in Current Directory"
+        echo " "
+        echo "Downloading latest $appname apk..."
+        echo " "
+        wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        sleep 0.5s
+        tput rc; tput ed
+    fi
+}
+
+patchexclusion()
+{
+    excludepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "off"))[].patchname' patches.json | sed "s/^/-e /g"))
+}
+
+versionselector()
+{
+    if su -c exit > /dev/null 2>&1
+    then
+        if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
+        then
+            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
+        fi
+    else
+        mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+        appver=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-cancel --ascii-lines --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    fi
+}
+
+fetchapk()
+{
     clear
     intro
     echo "Please wait fetching link ..."
-    getlink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver")
-    app_dl "$appname" "$appver" "$getlink" &&
-    echo "Building $appname Revanced..."
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk --custom-aapt2-binary ./aapt2_"$arch" --options options.toml --experimental
+    applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
+    tput rc; tput ed
+    app_dl
+}
+
+patchapp()
+{
+    echo "Patching $appname ..."
+    patchexclusion
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $excludepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk --custom-aapt2-binary ./aapt2_"$arch" --options options.toml --experimental
     rm -rf revanced-cache
-    mkdir -p /storage/emulated/0/Revancify
-    mv "$appname"Revanced* /storage/emulated/0/Revancify/ &&
-    sleep 0.5s &&
-    echo "$appname App saved to Revancify folder." &&
-    echo "Thanks for using Revancify..." &&
-    termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
+}
+
+#Build apps
+if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
+then
+    sucheck
+    versionselector
+    checkpatched
+    fetchapk
+    patchapp
+    if su -c exit > /dev/null 2>&1
+    then
+        mountapk
+    else
+        moveapk
+    fi
+
+else
+    versionselector
+    checkpatched
+    fetchapk
+    patchapp
+    moveapk
 fi
 
-tput cnorm
-rm -rf ./*cache
-cd ~ || exit
-exit
