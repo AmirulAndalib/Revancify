@@ -14,9 +14,9 @@ integrationsurl = "".join(["https://api.github.com/repos/", patchesrepo, "/revan
 
 
 requests_session = requests.Session()
-patches_version = (((requests_session.get(patchesurl)).json())['name'])
-cli_version = (((requests_session.get('https://api.github.com/repos/revanced/revanced-cli/releases/latest')).json())['name'])
-integrations_version = (((requests_session.get(integrationsurl)).json())['name'])
+patches_version = (((requests_session.get(patchesurl)).json())['name']).replace("v", "")
+cli_version = (((requests_session.get('https://api.github.com/repos/revanced/revanced-cli/releases/latest')).json())['name']).replace("v", "")
+integrations_version = (((requests_session.get(integrationsurl)).json())['name']).replace("v", "")
 
 print(patches_version)
 print(cli_version)

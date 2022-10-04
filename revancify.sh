@@ -56,7 +56,7 @@ get_components()
         then
             echo "Latest Patches already exixts."
             echo ""
-            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress
+            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress
             echo ""
         else
             echo "Patches update available !!"
@@ -64,7 +64,7 @@ get_components()
             echo ""
             echo "Downloading latest Patches..."
             echo ""
-            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress 
+            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress 
             echo ""
         fi
     else
@@ -72,7 +72,7 @@ get_components()
         echo ""
         echo "Downloading latest patches file..."
         echo ""
-        wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress 
+        wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress 
         echo ""
     fi
 
@@ -84,7 +84,7 @@ get_components()
         then
             echo "Latest CLI already exists."
             echo ""
-            wget -q -c https://github.com/revanced/revanced-cli/releases/download/"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+            wget -q -c https://github.com/revanced/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
             echo ""
         else
             echo "CLI update available !!"
@@ -92,7 +92,7 @@ get_components()
             echo ""
             echo "Downloading latest CLI..."
             echo ""
-            wget -q -c https://github.com/revanced/revanced-cli/releases/download/"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+            wget -q -c https://github.com/revanced/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
             echo ""
         fi
     else
@@ -100,7 +100,7 @@ get_components()
         echo ""
         echo "Downloading latest CLI..."
         echo ""
-        wget -q -c https://github.com/revanced/revanced-cli/releases/download/"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+        wget -q -c https://github.com/revanced/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
         echo ""
     fi
 
@@ -112,7 +112,7 @@ get_components()
         then
             echo "Latest Integrations already exists."
             echo ""
-            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress  
+            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress  
             echo ""
         else
             echo "Integrations update available !!"
@@ -120,7 +120,7 @@ get_components()
             echo ""
             echo "Downloading latest Integrations apk..."
             echo ""
-            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress
+            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress
             echo ""
             echo ""
         fi
@@ -129,7 +129,7 @@ get_components()
         echo ""
         echo "Downloading latest Integrations apk..."
         echo ""
-        wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress
+        wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress
         echo ""
         sleep 0.5s
         tput rc; tput ed
