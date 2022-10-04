@@ -3,6 +3,12 @@ import json
 
 localjson = None
 
+with open('sources.json', 'r') as sourcesfile:
+    sourcesjson = json.load(sourcesfile)
+
+patchesrepo = sourcesjson[0]['patches']['repo']
+patchesbranch = sourcesjson[0]['patches']['branch']
+
 def openjson():
     global localjson
     try:
@@ -16,12 +22,12 @@ def openjson():
 
 openjson()
 
-
-remotejson = requests.get('https://raw.githubusercontent.com/revanced/revanced-patches/main/patches.json').json()
+patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
+remotejson = requests.get(patchesurl).json()
 
 remotepatches = []
 localpatches = []
-
+obsoletepatches = []
 for key in remotejson:
     remotepatches.append(key['name'])
 
@@ -45,7 +51,10 @@ for patchname in remotepatches:
 
 for patchname in localpatches:
     if patchname not in remotepatches:
-        del localjson[localpatches.index(patchname)]
+        obsoletepatches.append(localpatches.index(patchname))
+
+for index in sorted(obsoletepatches, reverse=True):
+    del localjson[index]
 
 with open("patches.json", "w") as patchesfile:
     json.dump(localjson, patchesfile, indent=4)
