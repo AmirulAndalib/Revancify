@@ -3,6 +3,11 @@ import json
 
 localjson = None
 
+with open('sources.json', 'r') as sourcesfile:
+    sourcesjson = json.load(sourcesfile)
+
+patchesrepo = sourcesjson[0]['patches']['repo']
+
 def openjson():
     global localjson
     try:
@@ -16,8 +21,8 @@ def openjson():
 
 openjson()
 
-
-remotejson = requests.get('https://raw.githubusercontent.com/revanced/revanced-patches/main/patches.json').json()
+patchesurl =  "".join["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/main/patches.json"]
+remotejson = requests.get(patchesurl).json()
 
 remotepatches = []
 localpatches = []
