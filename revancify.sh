@@ -47,7 +47,7 @@ get_components()
 
     patchesrepo=$(jq '.[0].patches.repo' sources.json)
     
-    integrationsrepo=$(jq '.[0].integrations.repo' sources.json)
+    integrationsrepo=$(jq '.[1].integrations.repo' sources.json)
     #check patch
     if ls ./revanced-patches-* > /dev/null 2>&1
     then

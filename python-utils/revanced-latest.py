@@ -7,7 +7,7 @@ with open('sources.json', 'r') as sourcesfile:
     sourcesjson = json.load(sourcesfile)
 
 patchesrepo = sourcesjson[0]['patches']['repo']
-integrationsrepo = sourcesjson[0]['integrations']['repo']
+integrationsrepo = sourcesjson[1]['integrations']['repo']
 
 patchesurl = sourcesjson[0][ "https://api.github.com/repos/", patchesrepo, "/revanced-patches/releases/latest" ]
 integrationsurl = sourcesjson[0][ "https://api.github.com/repos/", patchesrepo, "/revanced-patches/releases/latest" ]
