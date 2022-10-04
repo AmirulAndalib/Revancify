@@ -10,7 +10,7 @@ patchesrepo = sourcesjson[0]['patches']['repo']
 integrationsrepo = sourcesjson[1]['integrations']['repo']
 
 patchesurl = "".join(["https://api.github.com/repos/", patchesrepo, "/revanced-patches/releases/latest"])
-integrationsurl = "".join(["https://api.github.com/repos/", patchesrepo, "/revanced-patches/releases/latest"])
+integrationsurl = "".join(["https://api.github.com/repos/", integrationsrepo, "/revanced-integrations/releases/latest"])
 
 
 requests_session = requests.Session()
