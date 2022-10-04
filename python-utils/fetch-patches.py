@@ -21,7 +21,7 @@ def openjson():
 
 openjson()
 
-patchesurl =  "".join["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/main/patches.json"]
+patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/main/patches.json"])
 remotejson = requests.get(patchesurl).json()
 
 remotepatches = []
