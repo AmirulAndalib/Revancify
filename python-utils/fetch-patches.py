@@ -27,7 +27,7 @@ remotejson = requests.get(patchesurl).json()
 
 remotepatches = []
 localpatches = []
-
+obsoletepatches = []
 for key in remotejson:
     remotepatches.append(key['name'])
 
@@ -51,7 +51,10 @@ for patchname in remotepatches:
 
 for patchname in localpatches:
     if patchname not in remotepatches:
-        del localjson[localpatches.index(patchname)]
+        obsoletepatches.append(localpatches.index(patchname))
+
+for index in sorted(obsoletepatches, reverse=True):
+    del localjson[index]
 
 with open("patches.json", "w") as patchesfile:
     json.dump(localjson, patchesfile, indent=4)
