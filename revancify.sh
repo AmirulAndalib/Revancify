@@ -157,12 +157,10 @@ sourcesedit()
     selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --ascii-lines --ok-label "Select" --menu "Select Sources" $fullpageheight $fullpagewidth 10 1 "Official: Revanced" 2 "Custom: Inotia00" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
-        tmp=$(mktemp)
-        jq '.[0].patches.repo = "revanced", .[0].patches.branch = "main", .[1].integrations.repo = "revanced", .[1].integrations.branch = "main"' sources.json > "$tmp" && mv "$tmp" ./sources.json
+        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
     elif [ "$selectsource" -eq "2" ]
     then
-        tmp=$(mktemp)
-        jq '.[0].patches.repo = "inotia00", .[0].patches.branch = "revanced-extended", .[1].integrations.repo = "inotia00", .[1].integrations.branch = "revanced-extended"' sources.json > "$tmp" && mv "$tmp" ./sources.json
+        echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
     fi
     mainmenu
 }
