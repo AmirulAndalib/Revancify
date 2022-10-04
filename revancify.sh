@@ -280,7 +280,7 @@ mountapk()
         echo "Mounting YouTube Revanced ..."
         su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube && exit' > /dev/null 2>&1
         tput cnorm && cd ~
-        su -c 'monkey -p com.google.android.youtube' > /dev/null 2>&1
+        su -c 'monkey -p com.google.android.youtube 1' > /dev/null 2>&1
         exit
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
@@ -290,7 +290,7 @@ mountapk()
         echo "Mounting YouTube Music Revanced ..."
         su -c -mm 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit' > /dev/null 2>&1
         tput cnorm && cd ~
-        su -c 'monkey -p com.google.android.apps.youtube.music' > /dev/null 2>&1
+        su -c 'monkey -p com.google.android.apps.youtube.music 1' > /dev/null 2>&1
         exit
     fi
     tput cnorm
