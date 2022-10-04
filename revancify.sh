@@ -69,8 +69,6 @@ get_components()
             echo ""
         fi
     else
-        echo "No patches found in Current Directory"
-        echo ""
         echo "Downloading latest patches file..."
         echo ""
         wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress 
@@ -97,8 +95,6 @@ get_components()
             echo ""
         fi
     else
-        echo "No CLI found in Current Directory"
-        echo ""
         echo "Downloading latest CLI..."
         echo ""
         wget -q -c https://github.com/revanced/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
@@ -126,8 +122,6 @@ get_components()
             echo ""
         fi
     else
-        echo "No Integrations found in Current Directory"
-        echo ""
         echo "Downloading latest Integrations apk..."
         echo ""
         wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress
