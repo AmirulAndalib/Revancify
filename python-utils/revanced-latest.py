@@ -17,9 +17,9 @@ integrationsurl = "".join(["https://api.github.com/repos/", integrationsrepo, "/
 
 
 requests_session = requests.Session()
-patches_version = (((requests_session.get(patchesurl)).json())['name']).replace("v", "")
-cli_version = (((requests_session.get(cliurl)).json())['name']).replace("v", "")
-integrations_version = (((requests_session.get(integrationsurl)).json())['name']).replace("v", "")
+patches_version = (((requests_session.get(patchesurl)).json())['tag_name']).replace("v", "")
+cli_version = (((requests_session.get(cliurl)).json())['tag_name']).replace("v", "")
+integrations_version = (((requests_session.get(integrationsurl)).json())['tag_name']).replace("v", "")
 
 print(patches_version)
 print(cli_version)
