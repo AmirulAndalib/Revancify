@@ -159,7 +159,7 @@ sourcesedit()
     then
         tmp=$(mktemp)
         jq '.[0].patches.repo = "revanced", .[0].patches.branch = "main", .[1].integrations.repo = "revanced", .[1].integrations.branch = "main"' sources.json > "$tmp" && mv "$tmp" ./sources.json
-    elif [ "$selectsource" -eq "0" ]
+    elif [ "$selectsource" -eq "2" ]
     then
         tmp=$(mktemp)
         jq '.[0].patches.repo = "inotia00", .[0].patches.branch = "revanced-extended", .[1].integrations.repo = "inotia00", .[1].integrations.branch = "revanced-extended"' sources.json > "$tmp" && mv "$tmp" ./sources.json
