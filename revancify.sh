@@ -28,7 +28,8 @@ get_components()
     intro
     if ls ./sources* > /dev/null 2>&1
     then
-        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+        sources='[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]'
+        echo "$sources" | jq '.' > sources.json
     fi
     
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
