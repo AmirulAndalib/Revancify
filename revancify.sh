@@ -162,6 +162,7 @@ sourcesedit()
             :
         else
             echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+            rm revanced-patches* && rm revanced-integrations
             get_components
         fi
     elif [ "$selectsource" -eq "2" ]
@@ -171,6 +172,7 @@ sourcesedit()
             :
         else
             echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
+            rm revanced-patches* && rm revanced-integrations
             get_components
         fi
     fi
