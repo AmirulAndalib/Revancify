@@ -25,6 +25,7 @@ fullpagewidth=$(tput cols )
 fullpageheight=$(($(tput lines) - 5 ))
 get_components()
 {
+    clear
     intro
     if ls ./sources* > /dev/null 2>&1
     then
@@ -145,9 +146,28 @@ else
     get_components
 fi
 
+sourcesedit()
+{
+    selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --ascii-lines --ok-label "Select" --menu "Select Sources" $fullpageheight $fullpagewidth 10 1 "Revanced" 2 "Inotia00" 2>&1> /dev/tty)
+    if [ "$selectsource" -eq "1" ]
+    then
+        tmp=$(mktemp)
+        jq '.[0].patches.repo = "revanced", .[0].patches.branch = "main", .[1].integrations.repo = "revanced", .[1].integrations.branch = "main"' sources.json > "$tmp" && mv "$tmp" ./sources.json
+    elif [ "$selectsource" -eq "0" ]
+    then
+        tmp=$(mktemp)
+        jq '.[0].patches.repo = "inotia00", .[0].patches.branch = "revanced-extended", .[1].integrations.repo = "inotia00", .[1].integrations.branch = "revanced-extended"' sources.json > "$tmp" && mv "$tmp" ./sources.json
+    fi
+    mainmenu
+}
+
 selectapp()
 {
-    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok" 2>&1> /dev/tty)
+    if [ "$patchesrepo" = "revanced" ]
+    then
+        otherapps=(3 "Twitter" 4 "Reddit" 5 "TikTok")
+    fi
+    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 1 "YouTube" 2 "YouTube Music" "${otherapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ "$exitstatus" -eq "0" ]
     then
@@ -210,7 +230,7 @@ patchoptions()
 mainmenu()
 {
     tput rc; tput ed
-    mainmenu=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --ascii-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Edit Patch Options" 4 "Update Resources" 2>&1> /dev/tty)
+    mainmenu=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --ascii-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Edit Patch Options" 4 "Update Resources" 5 "Edit Sources" 2>&1> /dev/tty)
     exitstatus=$?
     if [ "$exitstatus" -eq "0" ]
     then
@@ -228,6 +248,9 @@ mainmenu()
             clear
             intro
             get_components
+        elif [ "$mainmenu" -eq "5" ]
+        then
+            sourcesedit
         fi
     elif [ "$exitstatus" -ne "0" ]
     then
@@ -243,36 +266,20 @@ mountapk()
         su -c 'grep com.google.android.youtube /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done && am force-stop com.google.android.youtube'
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.youtube.apk"
         echo "Mounting YouTube Revanced ..."
-        if su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube && exit'
-        then
-            echo "Mounting successful"
-            tput cnorm && cd ~
-            su -c 'monkey -p com.google.android.youtube' > /dev/null 2>&1
-            exit
-        
-        else
-            echo "Mount failed..."
-            echo "Exiting the script"
-            tput cnorm && cd ~ && exit
-        fi
+        su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube && exit' > /dev/null 2>&1
+        tput cnorm && cd ~
+        su -c 'monkey -p com.google.android.youtube' > /dev/null 2>&1
+        exit
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
         echo "Unmounting YouTube Music ..."
         su -mm -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk && am force-stop com.google.android.apps.youtube.music"
         echo "Mounting YouTube Music Revanced ..."
-        if su -c -mm 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit'
-        then
-            echo "Mounting successful"
-            tput cnorm && cd ~
-            su -c 'monkey -p com.google.android.apps.youtube.music' > /dev/null 2>&1
-            exit
-        
-        else
-            echo "Mount failed..."
-            echo "Exiting the script"
-            tput cnorm && cd ~ && exit
-        fi
+        su -c -mm 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit' > /dev/null 2>&1
+        tput cnorm && cd ~
+        su -c 'monkey -p com.google.android.apps.youtube.music' > /dev/null 2>&1
+        exit
     fi
     tput cnorm
     rm -rf ./*cache
@@ -311,7 +318,7 @@ checkpatched()
     then
         if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --ascii-lines --yesno "Current directory contains a patched apk. Do You still want to patch?" $fullpageheight $fullpagewidth
+            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --ascii-lines --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
                 rm ./"$appname"Revanced-"$appver"*
             else
@@ -325,7 +332,7 @@ checkpatched()
     else
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --ascii-lines --yesno "Patched $appname with version $appver already exists. Do You still want to patch?" $fullpageheight $fullpagewidth
+            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --ascii-lines --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
                 :
             else
