@@ -148,7 +148,13 @@ fi
 
 sourcesedit()
 {
-    selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --ascii-lines --ok-label "Select" --menu "Select Sources" $fullpageheight $fullpagewidth 10 1 "Revanced" 2 "Inotia00" 2>&1> /dev/tty)
+    if ls ./sources* > /dev/null 2>&1
+    then
+        :
+    else
+        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+    fi
+    selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --ascii-lines --ok-label "Select" --menu "Select Sources" $fullpageheight $fullpagewidth 10 1 "Official: Revanced" 2 "Custom: Inotia00" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
         tmp=$(mktemp)
