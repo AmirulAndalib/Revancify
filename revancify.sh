@@ -246,7 +246,9 @@ mountapk()
         if su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube && exit'
         then
             echo "Mounting successful"
-            tput cnorm && cd ~ && exit
+            tput cnorm && cd ~
+            su -c 'monkey -p com.google.android.youtube' > /dev/null 2>&1
+            exit
         
         else
             echo "Mount failed..."
@@ -262,7 +264,9 @@ mountapk()
         if su -c -mm 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit'
         then
             echo "Mounting successful"
-            tput cnorm && cd ~ && exit
+            tput cnorm && cd ~
+            su -c 'monkey -p com.google.android.apps.youtube.music' > /dev/null 2>&1
+            exit
         
         else
             echo "Mount failed..."
