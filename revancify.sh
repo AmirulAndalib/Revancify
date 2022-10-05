@@ -31,7 +31,7 @@ get_components()
     then
         :
     else
-        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
     fi
     
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
@@ -47,8 +47,10 @@ get_components()
 
 
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
+
+    clirepo=$(jq -r '.[1].cli.repo' sources.json)
     
-    integrationsrepo=$(jq -r '.[1].integrations.repo' sources.json)
+    integrationsrepo=$(jq -r '.[2].integrations.repo' sources.json)
     #check patch
     if ls ./revanced-patches-* > /dev/null 2>&1
     then
@@ -83,7 +85,7 @@ get_components()
         then
             echo "Latest CLI already exists."
             echo ""
-            wget -q -c https://github.com/revanced/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
             echo ""
         else
             echo "CLI update available !!"
@@ -91,13 +93,13 @@ get_components()
             echo ""
             echo "Downloading latest CLI..."
             echo ""
-            wget -q -c https://github.com/revanced/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
             echo ""
         fi
     else
         echo "Downloading latest CLI..."
         echo ""
-        wget -q -c https://github.com/revanced/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+        wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
         echo ""
     fi
 
@@ -146,7 +148,7 @@ sourcesedit()
     then
         :
     else
-        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
     fi
     selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --ascii-lines --no-cancel --ok-label "Select" --menu "Select Source" $fullpageheight $fullpagewidth 10 1 "Official: Revanced" 2 "Custom: Inotia00" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
@@ -155,8 +157,8 @@ sourcesedit()
         then
             :
         else
-            echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
-            rm revanced-patches* && rm revanced-integrations
+            echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+            rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
             get_components
         fi
     elif [ "$selectsource" -eq "2" ]
@@ -165,8 +167,8 @@ sourcesedit()
         then
             :
         else
-            echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
-            rm revanced-patches* && rm revanced-integrations
+            echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
+            rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
             get_components
         fi
     fi
@@ -339,7 +341,7 @@ checkpatched()
                 mountapk
             fi
         else
-            rm ./"$appname"Revanced-*
+            rm ./"$appname"Revanced-* > /dev/null 2>&1
         fi
     else
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
@@ -362,8 +364,6 @@ checkpatched()
 }
 
 arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
-
-
 mainmenu
 
 sucheck()
