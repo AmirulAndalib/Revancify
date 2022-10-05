@@ -341,7 +341,7 @@ checkpatched()
                 mountapk
             fi
         else
-            rm ./"$appname"Revanced-*
+            rm ./"$appname"Revanced-* > /dev/null 2>&1
         fi
     else
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
@@ -364,8 +364,6 @@ checkpatched()
 }
 
 arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
-
-
 mainmenu
 
 sucheck()
