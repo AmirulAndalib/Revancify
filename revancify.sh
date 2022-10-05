@@ -177,6 +177,7 @@ sourcesedit()
 
 selectapp()
 {
+    patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
         apps=(1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok")
