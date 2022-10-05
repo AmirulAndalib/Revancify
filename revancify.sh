@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 revive(){
-    clear && echo "Script terminated" && rm -rf ./*cache ; tput cnorm ; cd ~ || : ; exit
+    clear && echo "Script terminated" && rm -rf /data/data/com.termux/files/home/storage/Revancify/*cache ; tput cnorm ; cd ~; exit
 }
 trap revive SIGINT
 
@@ -177,11 +177,15 @@ sourcesedit()
 
 selectapp()
 {
+    patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
-        otherapps=(3 "Twitter" 4 "Reddit" 5 "TikTok")
+        apps=(1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok")
+    elif [ "$patchesrepo" = "inotia00" ]
+    then
+        apps=(1 "YouTube" 2 "YouTube Music")
     fi
-    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 1 "YouTube" 2 "YouTube Music" "${otherapps[@]}" 2>&1> /dev/tty)
+    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ "$exitstatus" -eq "0" ]
     then
@@ -237,7 +241,6 @@ patchoptions()
     tmp=$(mktemp)
     dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --ascii-lines --title "Options File Editor" --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
-    clear
     mainmenu
 }
 
