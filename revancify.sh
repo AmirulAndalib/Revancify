@@ -155,7 +155,7 @@ sourcesedit()
     then
         if [ "$patchesrepo" = "revanced" ]
         then
-            :
+            echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
         else
             echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
             rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
@@ -165,7 +165,7 @@ sourcesedit()
     then
         if [ "$patchesrepo" = "inotia00" ]
         then
-            :
+            echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
         else
             echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
             rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
@@ -241,37 +241,6 @@ patchoptions()
     mainmenu
 }
 
-mainmenu()
-{
-    tput rc; tput ed
-    mainmenu=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --ascii-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Edit Patch Options" 4 "Update Resources" 5 "Edit Sources" 2>&1> /dev/tty)
-    exitstatus=$?
-    if [ "$exitstatus" -eq "0" ]
-    then
-        if [ "$mainmenu" -eq "1" ]
-        then
-            selectapp
-        elif [ "$mainmenu" -eq "2" ]
-        then
-            selectpatches
-        elif [ "$mainmenu" -eq "3" ]
-        then
-            patchoptions
-        elif [ "$mainmenu" -eq "4" ]
-        then
-            clear
-            intro
-            get_components
-        elif [ "$mainmenu" -eq "5" ]
-        then
-            sourcesedit
-        fi
-    elif [ "$exitstatus" -ne "0" ]
-    then
-        revive
-    fi
-}
-
 mountapk()
 {
     if [ "$pkgname" = "com.google.android.youtube" ]
@@ -288,7 +257,7 @@ mountapk()
     then
         echo "Unmounting YouTube Music ..."
         su -mm -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
-        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk && am force-stop com.google.android.apps.youtube.music"
+        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk"
         echo "Mounting YouTube Music Revanced ..."
         su -c -mm 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit' > /dev/null 2>&1
         su -c 'monkey -p com.google.android.apps.youtube.music 1' > /dev/null 2>&1
@@ -364,7 +333,6 @@ checkpatched()
 }
 
 arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
-mainmenu
 
 sucheck()
 {
@@ -474,26 +442,64 @@ patchapp()
 }
 
 #Build apps
-python3 ./python-utils/fetch-patches.py
-if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
-then
-    sucheck
-    versionselector
-    checkpatched
-    fetchapk
-    patchapp
-    if su -c exit > /dev/null 2>&1
+build()
+{
+    selectapp
+    python3 ./python-utils/fetch-patches.py
+    if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
-        mountapk
+        sucheck
+        versionselector
+        checkpatched
+        fetchapk
+        patchapp
+        if su -c exit > /dev/null 2>&1
+        then
+            mountapk
+        else
+            moveapk
+        fi
+
     else
+        versionselector
+        checkpatched
+        fetchapk
+        patchapp
         moveapk
     fi
+}
 
-else
-    versionselector
-    checkpatched
-    fetchapk
-    patchapp
-    moveapk
-fi
 
+
+mainmenu()
+{
+    tput rc; tput ed
+    mainmenu=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --ascii-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Edit Patch Options" 4 "Update Resources" 5 "Edit Sources" 2>&1> /dev/tty)
+    exitstatus=$?
+    if [ "$exitstatus" -eq "0" ]
+    then
+        if [ "$mainmenu" -eq "1" ]
+        then
+            buildapp
+        elif [ "$mainmenu" -eq "2" ]
+        then
+            selectpatches
+        elif [ "$mainmenu" -eq "3" ]
+        then
+            patchoptions
+        elif [ "$mainmenu" -eq "4" ]
+        then
+            clear
+            intro
+            get_components
+        elif [ "$mainmenu" -eq "5" ]
+        then
+            sourcesedit
+        fi
+    elif [ "$exitstatus" -ne "0" ]
+    then
+        revive
+    fi
+}
+
+mainmenu
