@@ -59,7 +59,7 @@ get_components()
         then
             echo "Latest Patches already exixts."
             echo ""
-            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress
+            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         else
             echo "Patches update available !!"
@@ -67,13 +67,13 @@ get_components()
             echo ""
             echo "Downloading latest Patches..."
             echo ""
-            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress 
+            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         fi
     else
         echo "Downloading latest patches file..."
         echo ""
-        wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress 
+        wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         echo ""
     fi
 
@@ -85,7 +85,7 @@ get_components()
         then
             echo "Latest CLI already exists."
             echo ""
-            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         else
             echo "CLI update available !!"
@@ -93,13 +93,13 @@ get_components()
             echo ""
             echo "Downloading latest CLI..."
             echo ""
-            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         fi
     else
         echo "Downloading latest CLI..."
         echo ""
-        wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress 
+        wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         echo ""
     fi
 
@@ -111,7 +111,7 @@ get_components()
         then
             echo "Latest Integrations already exists."
             echo ""
-            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress  
+            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         else
             echo "Integrations update available !!"
@@ -119,14 +119,14 @@ get_components()
             echo ""
             echo "Downloading latest Integrations apk..."
             echo ""
-            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress
+            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
             echo ""
         fi
     else
         echo "Downloading latest Integrations apk..."
         echo ""
-        wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress
+        wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         echo ""
         sleep 0.5s
         tput rc; tput ed
@@ -249,7 +249,10 @@ mountapk()
     if [ "$pkgname" = "com.google.android.youtube" ]
     then
         echo "Unmounting YouTube..."
+        echo "Please wait..."
+        echo "This may take some time."
         su -c 'grep com.google.android.youtube /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done && am force-stop com.google.android.youtube'
+        su -c "pm install ./$appname-$appver.apk"
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.youtube.apk"
         echo "Mounting YouTube Revanced ..."
         su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube && exit' > /dev/null 2>&1
@@ -259,7 +262,10 @@ mountapk()
         pidof com.termux | xargs kill -9
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
-        echo "Unmounting YouTube Music ..."
+        echo "Unmounting YouTube Music..."
+        echo "Please wait..."
+        echo "This may take some time."
+        su -c "pm install ./$appname-$appver.apk"
         su -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk"
         echo "Mounting YouTube Music Revanced ..."
@@ -293,7 +299,7 @@ dlmicrog()
         then
             clear
             intro
-            wget -q -c "https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk" -O "Vanced_MicroG.apk" --show-progress
+            wget -q -c "https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk" -O "Vanced_MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
             mv "Vanced_MicroG.apk" /storage/emulated/0/Revancify
             echo MicroG App saved to Revancify folder.
@@ -366,6 +372,7 @@ sucheck()
             exit
         fi
     else
+        sed -i '/allow_external_apps/s/"# "//' ~/.termux/termux.properties
         dlmicrog
     fi
 }
@@ -432,7 +439,7 @@ fetchapk()
 {
     clear
     intro
-    echo "Please wait fetching link ..."
+    echo "Please wait while the link is being fetched..."
     applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
     tput rc; tput ed
     app_dl
