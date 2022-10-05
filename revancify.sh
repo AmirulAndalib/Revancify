@@ -179,9 +179,12 @@ selectapp()
 {
     if [ "$patchesrepo" = "revanced" ]
     then
-        otherapps=(3 "Twitter" 4 "Reddit" 5 "TikTok")
+        apps=(1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok")
+    elif [ "$patchesrepo" = "inotia00" ]
+    then
+        apps=(1 "YouTube" 2 "YouTube Music")
     fi
-    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 1 "YouTube" 2 "YouTube Music" "${otherapps[@]}" 2>&1> /dev/tty)
+    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --ascii-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ "$exitstatus" -eq "0" ]
     then
