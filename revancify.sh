@@ -372,7 +372,7 @@ sucheck()
             exit
         fi
     else
-        sed '/allow_external_apps/s/"# "//' ~/.termux/termux.properties
+        sed -i '/allow_external_apps/s/"# "//' ~/.termux/termux.properties
         dlmicrog
     fi
 }
