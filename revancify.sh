@@ -372,6 +372,7 @@ sucheck()
             exit
         fi
     else
+        sed '/allow_external_apps/s/"# "//' ~/.termux/termux.properties
         dlmicrog
     fi
 }
@@ -438,7 +439,7 @@ fetchapk()
 {
     clear
     intro
-    echo "Please wait fetching link ..."
+    echo "Please wait while the link is being fetched..."
     applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
     tput rc; tput ed
     app_dl
