@@ -442,7 +442,7 @@ patchapp()
 }
 
 #Build apps
-build()
+buildapp()
 {
     selectapp
     python3 ./python-utils/fetch-patches.py
