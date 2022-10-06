@@ -170,7 +170,9 @@ changesource()
             echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
         else
             echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
-            rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
+            rm revanced-patches* > /dev/null 2>&1
+            rm revanced-integrations* > /dev/null 2>&1
+            rm revanced-cli* > /dev/null 2>&1
             python3 ./python-utils/fetch-patches.py
             fetchresources
         fi
