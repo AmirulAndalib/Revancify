@@ -154,12 +154,6 @@ get_components()
 sourcesedit()
 {
     internet
-    if ls ./sources* > /dev/null 2>&1
-    then
-        :
-    else
-        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
-    fi
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --no-lines --no-cancel --ok-label "Select" --menu "Select Source" $fullpageheight $fullpagewidth 10 1 "Official: Revanced" 2 "Custom: Inotia00" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
@@ -530,6 +524,12 @@ buildapp()
 mainmenu()
 {
     tput rc; tput ed
+    if ls ./sources* > /dev/null 2>&1
+    then
+        :
+    else
+        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+    fi
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
@@ -563,5 +563,6 @@ mainmenu()
         revive
     fi
 }
+
 
 mainmenu
