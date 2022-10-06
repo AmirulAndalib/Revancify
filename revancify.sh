@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-revive(){
+terminatescript(){
     clear && echo "Script terminated" && rm -rf /data/data/com.termux/files/home/storage/Revancify/*cache ; tput cnorm ; cd ~; exit
 }
-trap revive SIGINT
+trap terminatescript SIGINT
 
 # For update change this sentence here ...
 
@@ -539,27 +539,25 @@ mainmenu()
     fi
     mainmenu=$(dialog --begin 0 $leavecols --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --no-lines --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
     exitstatus=$?
-    if [ "$exitstatus" -eq "0" ]
+    if [ "$mainmenu" -eq "1" ]
     then
-        if [ "$mainmenu" -eq "1" ]
-        then
-            buildapp
-        elif [ "$mainmenu" -eq "2" ]
-        then
-            selectpatches
-        elif [ "$mainmenu" -eq "3" ]
-        then
-            changesource
-        elif [ "$mainmenu" -eq "4" ]
-        then
-            fetchresources
-        elif [ "$mainmenu" -eq "5" ]
-        then
-            patchoptions
-        fi
-    elif [ "$exitstatus" -ne "0" ]
+        buildapp
+    elif [ "$mainmenu" -eq "2" ]
     then
-        revive
+        selectpatches
+    elif [ "$mainmenu" -eq "3" ]
+    then
+        changesource
+    elif [ "$mainmenu" -eq "4" ]
+    then
+        fetchresources
+    elif [ "$mainmenu" -eq "5" ]
+    then
+        patchoptions
+    fi   
+    if [ "$exitstatus" -ne "0" ]
+    then
+        terminatescript
     fi
 }
 
