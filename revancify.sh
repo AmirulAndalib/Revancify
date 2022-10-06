@@ -17,6 +17,7 @@ internet()
         intro
         echo "Oops! No Internet Connection available."
         echo "Connect to Internet and try again..."
+        sleep 3s
         mainmenu
     fi
 }
