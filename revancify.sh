@@ -151,13 +151,6 @@ get_components()
 }
 
 
-if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
-then
-    :
-else
-    get_components
-fi
-
 sourcesedit()
 {
     internet
@@ -330,6 +323,17 @@ dlmicrog()
     fi
 }
 
+checkresource()
+{
+    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
+    then
+        return 0
+    else
+        get_components
+    fi
+}
+
+
 checkpatched()
 {
     if su -c exit > /dev/null 2>&1
@@ -483,6 +487,7 @@ patchapp()
 buildapp()
 {
     selectapp
+    checkresource
     if ls ./patches* > /dev/null 2>&1
     then
         :
