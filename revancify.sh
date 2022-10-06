@@ -43,10 +43,8 @@ fetchresources()
     internet
     clear
     intro
-    if ls ./sources* > /dev/null 2>&1
+    if ! ls ./sources* > /dev/null 2>&1
     then
-        :
-    else
         echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
     fi
     
@@ -236,10 +234,8 @@ selectapp()
 selectpatches()
 {  
     selectapp
-    if ls ./patches* > /dev/null 2>&1
+    if ! ls ./patches* > /dev/null 2>&1
     then
-        :
-    else
         internet
         python3 ./python-utils/fetch-patches.py
     fi
@@ -366,10 +362,8 @@ checkpatched()
     else
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --no-lines --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if ! dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --no-lines --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
-                :
-            else
                 clear
                 intro
                 termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
@@ -390,17 +384,13 @@ sucheck()
     if su -c exit > /dev/null 2>&1
     then
         su -c "mkdir -p /data/adb/revanced"
-        if su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
+        if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
         then
-            :
-        else
             su -c "cp mount_revanced_com.google.android.youtube.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.youtube.sh"
             su -c "cp mount_revanced_com.google.android.apps.youtube.music.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.apps.youtube.music.sh"
         fi
-        if su -c "dumpsys package $pkgname" | grep -q path
+        if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            :
-        else
             sleep 0.5s
             echo "Oh No, $appname is not installed"
             echo ""
@@ -464,7 +454,13 @@ versionselector()
 {
     internet
     mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    appver=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-cancel --no-lines --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    appver=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-lines --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    exitstatus=$?
+    if [ $exitstatus -ne 0 ]
+    then
+        mainmenu
+    fi
+
 }
 
 fetchapk()
@@ -491,10 +487,8 @@ buildapp()
 {
     selectapp
     checkresource
-    if ls ./patches* > /dev/null 2>&1
+    if ! ls ./patches* > /dev/null 2>&1
     then
-        :
-    else
         internet
         python3 ./python-utils/fetch-patches.py
     fi
@@ -531,10 +525,8 @@ buildapp()
 mainmenu()
 {
     tput rc; tput ed
-    if ls ./sources* > /dev/null 2>&1
+    if ! ls ./sources* > /dev/null 2>&1
     then
-        :
-    else
         echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
     fi
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
