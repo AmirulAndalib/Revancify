@@ -244,7 +244,7 @@ selectpatches()
         read -r -a eachline <<< "$line"
         patches+=("${eachline[@]}")
     done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname) \(.status)"' patches.json)
-    choices=($("${header[@]}" --title 'Patch Selection Menu' --no-items --no-lines --keep-window --no-shadow --extra-button --extra-label "Select all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty))
+    choices=($("${header[@]}" --title 'Patch Selection Menu' --no-items --no-lines --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty))
     selectpatchstatus=$?
     patchsaver
 }
@@ -256,6 +256,11 @@ patchsaver()
         tmp=$(mktemp)
         jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json | jq 'map(select(IN(.patchname; $ARGS.positional[])).status = "on")' --args "${choices[@]}" > "$tmp" && mv "$tmp" ./patches.json
         mainmenu
+    elif [ $selectpatchstatus -eq 2 ]
+    then
+        tmp=$(mktemp)
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json > "$tmp" && mv "$tmp" ./patches.json
+        selectpatches
     elif [ $selectpatchstatus -eq 3 ]
     then
         tmp=$(mktemp)
