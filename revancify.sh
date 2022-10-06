@@ -201,28 +201,30 @@ selectapp()
     fi
     selectapp=$(dialog --begin 0 $leavecols --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --no-lines --no-shadow --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
-    if [ "$selectapp" -eq "1" ]
+    if [ $exitstatus -eq 0 ]
     then
-        appname=YouTube
-        pkgname=com.google.android.youtube
-    elif [ "$selectapp" -eq "2" ]
-    then
-        appname=YouTubeMusic
-        pkgname=com.google.android.apps.youtube.music
-    elif [ "$selectapp" -eq "3" ]
-    then
-        appname=Twitter
-        pkgname=com.twitter.android
-    elif [ "$selectapp" -eq "4" ]
-    then
-        appname=Reddit
-        pkgname=com.reddit.frontpage
-    elif [ "$selectapp" -eq "5" ]
-    then
-        appname=TikTok
-        pkgname=com.ss.android.ugc.trill
-    fi
-    if [ $exitstatus -ne 0 ]
+        if [ "$selectapp" -eq "1" ]
+        then
+            appname=YouTube
+            pkgname=com.google.android.youtube
+        elif [ "$selectapp" -eq "2" ]
+        then
+            appname=YouTubeMusic
+            pkgname=com.google.android.apps.youtube.music
+        elif [ "$selectapp" -eq "3" ]
+        then
+            appname=Twitter
+            pkgname=com.twitter.android
+        elif [ "$selectapp" -eq "4" ]
+        then
+            appname=Reddit
+            pkgname=com.reddit.frontpage
+        elif [ "$selectapp" -eq "5" ]
+        then
+            appname=TikTok
+            pkgname=com.ss.android.ugc.trill
+        fi
+    elif [ $exitstatus -ne 0 ]
     then
         mainmenu
     fi
@@ -536,23 +538,25 @@ mainmenu()
     fi
     mainmenu=$(dialog --begin 0 $leavecols --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --no-lines --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
     exitstatus=$?
-    if [ "$mainmenu" -eq "1" ]
+    if [ $exitstatus -eq 0 ]
     then
-        buildapp
-    elif [ "$mainmenu" -eq "2" ]
-    then
-        selectpatches
-    elif [ "$mainmenu" -eq "3" ]
-    then
-        changesource
-    elif [ "$mainmenu" -eq "4" ]
-    then
-        fetchresources
-    elif [ "$mainmenu" -eq 5 ]
-    then
-        patchoptions
-    fi   
-    if [ $exitstatus -ne 0 ]
+        if [ "$mainmenu" -eq "1" ]
+        then
+            buildapp
+        elif [ "$mainmenu" -eq "2" ]
+        then
+            selectpatches
+        elif [ "$mainmenu" -eq "3" ]
+        then
+            changesource
+        elif [ "$mainmenu" -eq "4" ]
+        then
+            fetchresources
+        elif [ "$mainmenu" -eq 5 ]
+        then
+            patchoptions
+        fi
+    elif [ $exitstatus -ne 0 ]
     then
         terminatescript
     fi
