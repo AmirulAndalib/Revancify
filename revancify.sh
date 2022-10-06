@@ -244,7 +244,7 @@ selectpatches()
         read -r -a eachline <<< "$line"
         patches+=("${eachline[@]}")
     done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname) \(.status)"' patches.json)
-    mapfile -t choices < <(dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patch Selection Menu' --no-items --no-lines --keep-window --no-shadow --extra-button --extra-label "Select all" --ok-label "Save" --no-cancel --separate-output --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty)
+    choices=$(dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patch Selection Menu' --no-items --no-lines --keep-window --no-shadow --extra-button --extra-label "Select all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty)
     selectpatchstatus=$?
     patchsaver
 }
