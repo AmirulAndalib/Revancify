@@ -232,7 +232,6 @@ selectapp()
 
 selectpatches()
 {  
-    selectapp
     if ! ls ./patches* > /dev/null 2>&1
     then
         internet
@@ -258,7 +257,8 @@ patchsaver()
         mainmenu
     elif [ $selectpatchstatus -eq 3 ]
     then
-        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "on")' patches.json
+        tmp=$(mktemp)
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "on")' patches.json > "$tmp" && mv "$tmp" ./patches.json
         selectpatches
     fi
 }
@@ -557,6 +557,7 @@ mainmenu()
             buildapp
         elif [ "$mainmenu" -eq "2" ]
         then
+            selectapp
             selectpatches
         elif [ "$mainmenu" -eq "3" ]
         then
