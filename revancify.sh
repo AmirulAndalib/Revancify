@@ -234,13 +234,8 @@ selectapp()
 selectpatches()
 {  
     selectapp
-    if ls ./patches* > /dev/null 2>&1
-    then
-        :
-    else
-        internet
-        python3 ./python-utils/fetch-patches.py
-    fi
+    internet
+    python3 ./python-utils/fetch-patches.py
     declare -a patches
     while read -r line
     do
