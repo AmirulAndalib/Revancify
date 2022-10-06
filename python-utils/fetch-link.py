@@ -16,7 +16,7 @@ if sys.argv[1] == "YouTube":
 
 
 
-elif sys.argv[1] == "YouTubeMusic":
+elif sys.argv[1] == "YTMusic":
 
     appurl = "".join(["https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-", sys.argv[2].replace(".","-"), "-release/"])
 

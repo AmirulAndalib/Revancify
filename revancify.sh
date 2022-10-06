@@ -194,10 +194,10 @@ selectapp()
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
-        apps=(1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok")
+        apps=(1 "YouTube" 2 "YTMusic" 3 "Twitter" 4 "Reddit" 5 "TikTok")
     elif [ "$patchesrepo" = "inotia00" ]
     then
-        apps=(1 "YouTube" 2 "YouTube Music")
+        apps=(1 "YouTube" 2 "YTMusic")
     fi
     selectapp=$(dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --no-lines --keep-window --no-shadow --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
@@ -209,7 +209,7 @@ selectapp()
             pkgname=com.google.android.youtube
         elif [ "$selectapp" -eq "2" ]
         then
-            appname=YouTubeMusic
+            appname=YTMusic
             pkgname=com.google.android.apps.youtube.music
         elif [ "$selectapp" -eq "3" ]
         then
@@ -298,13 +298,13 @@ mountapk()
         pidof com.termux | xargs kill -9
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
-        echo "Unmounting YouTube Music..."
+        echo "Unmounting YTMusic..."
         echo "Please wait..."
         echo "This may take some time."
         su -c "pm install ./$appname-$appver.apk"
         su -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk"
-        echo "Mounting YouTube Music Revanced ..."
+        echo "Mounting YTMusic Revanced ..."
         su -mm -c 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit' > /dev/null 2>&1
         sleep 2
         su -c 'monkey -p com.google.android.apps.youtube.music 1' > /dev/null 2>&1
@@ -331,7 +331,7 @@ moveapk()
 
 dlmicrog()
 {
-    if dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'MicroG Prompt' --no-items --defaultno --no-lines --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YouTube Music won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
+    if dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'MicroG Prompt' --no-items --defaultno --no-lines --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
         then
             clear
             intro
@@ -466,7 +466,7 @@ versionselector()
 {
     internet
     mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    appver=$(dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-lines --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    appver=$(dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-lines --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -ne 0 ]
     then
