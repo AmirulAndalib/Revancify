@@ -38,7 +38,7 @@ intro()
 leavecols=$(($(($(tput cols) - 38)) / 2))
 fullpagewidth=$(tput cols )
 fullpageheight=$(($(tput lines) - 5 ))
-get_components()
+fetchresources()
 {
     internet
     clear
@@ -151,11 +151,18 @@ get_components()
 }
 
 
-sourcesedit()
+changesource()
 {
     internet
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
-    selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --no-lines --no-cancel --ok-label "Select" --menu "Select Source" $fullpageheight $fullpagewidth 10 1 "Official: Revanced" 2 "Custom: Inotia00" 2>&1> /dev/tty)
+    if [ "$patchesrepo" = "revanced" ]
+    then
+        selectedsolurce=(1 "Official: Revanced" on 2 "Custom: Inotia00" off)
+    elif [ "$patchesrepo" = "inotia00" ]
+    then
+        selectedsolurce=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
+    fi
+    selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --no-lines --no-cancel --ok-label "Done" --radiolist "Select Source" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
         if [ "$patchesrepo" = "revanced" ]
@@ -164,7 +171,8 @@ sourcesedit()
         else
             echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
             rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
-            get_components
+            python3 ./python-utils/fetch-patches.py
+            fetchresources
         fi
     elif [ "$selectsource" -eq "2" ]
     then
@@ -174,7 +182,8 @@ sourcesedit()
         else
             echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
             rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
-            get_components
+            python3 ./python-utils/fetch-patches.py
+            fetchresources
         fi
     fi
     mainmenu
@@ -251,7 +260,7 @@ patchoptions()
     then
         :
     else
-        get_components
+        fetchresources
     fi
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
@@ -330,7 +339,7 @@ checkresource()
     then
         return 0
     else
-        get_components
+        fetchresources
     fi
 }
 
@@ -533,10 +542,10 @@ mainmenu()
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
-        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Edit Sources" 4 "Update Resources" 5 "Edit Patch Options")
+        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources" 5 "Edit Patch Options")
     elif [ "$patchesrepo" = "inotia00" ]
     then
-        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Edit Sources" 4 "Update Resources")
+        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources")
     fi
     mainmenu=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --no-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
     exitstatus=$?
@@ -550,10 +559,10 @@ mainmenu()
             selectpatches
         elif [ "$mainmenu" -eq "3" ]
         then
-            sourcesedit
+            changesource
         elif [ "$mainmenu" -eq "4" ]
         then
-            get_components
+            fetchresources
         elif [ "$mainmenu" -eq "5" ]
         then
             patchoptions
