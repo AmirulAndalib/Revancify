@@ -411,7 +411,6 @@ sucheck()
             exit
         fi
     else
-        sed -i '/allow-external-apps/s/# //' ~/.termux/termux.properties
         dlmicrog
     fi
 }
@@ -463,17 +462,9 @@ patchinclusion()
 
 versionselector()
 {
-    if su -c exit > /dev/null 2>&1
-    then
-        if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
-        then
-            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
-        fi
-    else
-        internet
-        mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-        appver=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-cancel --no-lines --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-    fi
+    internet
+    mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+    appver=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-cancel --no-lines --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
 }
 
 fetchapk()
@@ -510,6 +501,12 @@ buildapp()
     if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
         sucheck
+        if su -c exit > /dev/null 2>&1
+        then
+            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
+        else
+            versionselector
+        fi
         versionselector
         checkpatched
         fetchapk
