@@ -507,7 +507,6 @@ buildapp()
         else
             versionselector
         fi
-        versionselector
         checkpatched
         fetchapk
         patchapp
