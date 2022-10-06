@@ -255,7 +255,6 @@ patchsaver()
     then
         tmp=$(mktemp)
         jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json | jq 'map(select(IN(.patchname; $ARGS.positional[])).status = "on")' --args "${choices[@]}" > "$tmp" && mv "$tmp" ./patches.json
-        return 0
         mainmenu
     elif [ $selectpatchstatus -eq 3 ]
     then
