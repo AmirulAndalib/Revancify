@@ -1,4 +1,5 @@
 #!/data/data/com.termux/files/usr/bin/bash
+exec > ./log.txt 2>&1
 
 revive(){
     clear && echo "Script terminated" && rm -rf /data/data/com.termux/files/home/storage/Revancify/*cache ; tput cnorm ; cd ~; exit
