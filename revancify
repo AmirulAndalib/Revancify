@@ -1,42 +1,52 @@
 #!/data/data/com.termux/files/usr/bin/bash
 if ping -c 1 google.com > /dev/null 2>&1
 then
-    :
+    if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ "$(find ~/../usr/lib/ -name "wheel" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "requests" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "bs4" | wc -l)" != "0" ] && [ -e ~/../usr/bin/revancify ] 
+    then
+        if cd ~/storage/Revancify > /dev/null 2>&1 
+        then
+            tput civis
+            rm -rf ./*cache
+            git checkout . > /dev/null 2>&1
+            git pull > /dev/null 2>&1
+            cp dialog-config.txt ~/.dialogrc
+            cp revancify ~/../usr/bin/revancify
+            bash revancify.sh
+            clear
+        else
+            echo "Revancify is not installed"
+            exit
+        fi
+    else
+        echo "Installing dependencies..."
+        sleep 0.5s
+        git pull
+        pkg update -y &&
+        pkg install python openjdk-17 wget ncurses-utils dialog jq -y
+        pip install --upgrade pip
+        pip install wheel
+        pip install requests bs4
+        cp revancify ~/../usr/bin
+        sed -i 's/# allow-external-apps = true/allow-external-apps = true/g' ~/.termux/termux.properties
+        sleep 0.5s
+        echo "Dependencies installed successfully."
+        bash revancify.sh
+    fi
 else
-    echo "No Internet connection available"
-    exit
+    if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ "$(find ~/../usr/lib/ -name "wheel" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "requests" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "bs4" | wc -l)" != "0" ] && [ -e ~/../usr/bin/revancify ] 
+    then
+        if cd ~/storage/Revancify > /dev/null 2>&1 
+        then
+            tput civis
+            rm -rf ./*cache
+            bash revancify.sh
+        else
+            echo "Revancify is not installed"
+            exit
+        fi
+    else
+        echo "All dependencies are not installed."
+        echo "Connect to Internet and run revancify again."
+        exit
+    fi
 fi
-
-if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ "$(find ~/../usr/lib/ -name "wheel" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "requests" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "bs4" | wc -l)" != "0" ] && [ -e ~/../usr/bin/revancify ] 
-then
-    :
-else
-    echo "Installing dependencies..."
-    sleep 0.5s
-    git pull
-    pkg update -y &&
-    pkg install python openjdk-17 wget ncurses-utils dialog jq -y
-    pip install --upgrade pip
-    pip install wheel
-    pip install requests bs4
-    cp revancify ~/../usr/bin
-    sed -i 's/# allow-external-apps = true/allow-external-apps = true/g' ~/.termux/termux.properties
-    sleep 0.5s
-    echo "Dependencies installed successfully."
-    bash revancify.sh
-fi
-if cd ~/storage/Revancify > /dev/null 2>&1 
-then
-    tput civis
-    rm -rf ./*cache
-    git checkout . > /dev/null 2>&1
-    git pull > /dev/null 2>&1
-    cp dialog-config.txt ~/.dialogrc
-    cp revancify ~/../usr/bin/revancify
-    clear
-else
-    echo "Revancify is not installed"
-    exit
-fi
-
-bash revancify.sh
