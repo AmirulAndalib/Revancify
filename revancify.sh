@@ -253,6 +253,12 @@ selectpatches()
 
 patchoptions()
 {
+    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
+    then
+        :
+    else
+        get_components
+    fi
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
@@ -539,8 +545,6 @@ mainmenu()
             patchoptions
         elif [ "$mainmenu" -eq "4" ]
         then
-            clear
-            intro
             get_components
         elif [ "$mainmenu" -eq "5" ]
         then
