@@ -171,6 +171,7 @@ changesource()
         else
             echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
             rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
+            python3 ./python-utils/fetch-patches.py
             fetchresources
         fi
     elif [ "$selectsource" -eq "2" ]
@@ -181,6 +182,7 @@ changesource()
         else
             echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
             rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
+            python3 ./python-utils/fetch-patches.py
             fetchresources
         fi
     fi
