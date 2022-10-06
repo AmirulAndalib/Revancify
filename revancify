@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 
-dependenciescheck()
+checkdependencies()
 {
     if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ "$(find ~/../usr/lib/ -name "wheel" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "requests" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "bs4" | wc -l)" != "0" ] && [ -e ~/../usr/bin/revancify ]
     then
@@ -40,7 +40,6 @@ checkrevancify()
 if ping -c 1 google.com > /dev/null 2>&1
 then
     checkrevancify
-    checkdependencies
     if checkdependencies
     then
         tput civis
@@ -56,7 +55,6 @@ then
     fi
 else
     checkrevancify
-    checkdependencies
     if checkdependencies
     then
         tput civis
