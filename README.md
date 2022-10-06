@@ -27,6 +27,11 @@ termux-setup-storage && pkg update -y && pkg install git -y && cd storage && git
 1. Open Termux.  
 2. Type `revancify`  
 
+
+# Support
+
+For help and support, Join [Telegram Channel](https://t.me/revancify)  
+
 # Troubleshoot
 
 ## Command 1: 
