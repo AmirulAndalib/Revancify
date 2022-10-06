@@ -7,6 +7,20 @@ trap revive SIGINT
 
 # For update change this sentence here ...
 
+internet()
+{
+    if ping -c 1 google.com > /dev/null 2>&1
+    then
+        return 0
+    else
+        clear
+        intro
+        echo "Oops! No Internet Connection available."
+        echo "Connect to Internet and try again..."
+        mainmenu
+    fi
+}
+
 intro()
 {
     tput civis
@@ -25,6 +39,7 @@ fullpagewidth=$(tput cols )
 fullpageheight=$(($(tput lines) - 5 ))
 get_components()
 {
+    internet
     clear
     intro
     if ls ./sources* > /dev/null 2>&1
@@ -144,6 +159,7 @@ fi
 
 sourcesedit()
 {
+    internet
     if ls ./sources* > /dev/null 2>&1
     then
         :
@@ -220,7 +236,13 @@ selectapp()
 selectpatches()
 {  
     selectapp
-    python3 ./python-utils/fetch-patches.py
+    if ls ./patches* > /dev/null 2>&1
+    then
+        :
+    else
+        internet
+        python3 ./python-utils/fetch-patches.py
+    fi
     declare -a patches
     while read -r line
     do
@@ -380,6 +402,7 @@ sucheck()
 # App Downloader
 app_dl()
 {
+    internet
     if ls ./"$appname"-* > /dev/null 2>&1
     then
         app_available=$(basename "$appname"-* .apk | cut -d '-' -f 2) #get version
@@ -430,6 +453,7 @@ versionselector()
             appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
         fi
     else
+        internet
         mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
         appver=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-cancel --ascii-lines --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
     fi
@@ -437,6 +461,7 @@ versionselector()
 
 fetchapk()
 {
+    internet
     clear
     intro
     echo "Please wait while the link is being fetched..."
@@ -457,7 +482,13 @@ patchapp()
 buildapp()
 {
     selectapp
-    python3 ./python-utils/fetch-patches.py
+    if ls ./patches* > /dev/null 2>&1
+    then
+        :
+    else
+        internet
+        python3 ./python-utils/fetch-patches.py
+    fi
     if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
         sucheck
