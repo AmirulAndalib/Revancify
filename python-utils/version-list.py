@@ -15,7 +15,7 @@ if sys.argv[1] == "YouTube":
         if json['name'] == 'general-ads':
             for appver in (((json['compatiblePackages'])[0])['versions'])[-1:-11:-1]:
                 print(appver)
-elif sys.argv[1] == "YouTubeMusic":
+elif sys.argv[1] == "YTMusic":
     for json in (requests.get('https://raw.githubusercontent.com/revanced/revanced-patches/main/patches.json')).json():
         if json['name'] == 'compact-header':
             for appver in (((json['compatiblePackages'])[0])['versions'])[::-1]:

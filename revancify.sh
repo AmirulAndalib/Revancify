@@ -1,9 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-revive(){
+terminatescript(){
     clear && echo "Script terminated" && rm -rf /data/data/com.termux/files/home/storage/Revancify/*cache ; tput cnorm ; cd ~; exit
 }
-trap revive SIGINT
+trap terminatescript SIGINT
 
 # For update change this sentence here ...
 
@@ -38,15 +38,14 @@ intro()
 leavecols=$(($(($(tput cols) - 38)) / 2))
 fullpagewidth=$(tput cols )
 fullpageheight=$(($(tput lines) - 5 ))
+header=(dialog --begin 0 $leavecols --no-lines --keep-window --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0)
 fetchresources()
 {
     internet
     clear
     intro
-    if ls ./sources* > /dev/null 2>&1
+    if ! ls ./sources* > /dev/null 2>&1
     then
-        :
-    else
         echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
     fi
     
@@ -162,7 +161,7 @@ changesource()
     then
         selectedsolurce=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
     fi
-    selectsource=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Source Selection Menu' --no-lines --no-cancel --ok-label "Done" --radiolist "Select Source" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
+    selectsource=$("${header[@]}" --title 'Source Selection Menu' --no-lines --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Select Source" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
         if [ "$patchesrepo" = "revanced" ]
@@ -196,14 +195,14 @@ selectapp()
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
-        apps=(1 "YouTube" 2 "YouTube Music" 3 "Twitter" 4 "Reddit" 5 "TikTok")
+        apps=(1 "YouTube" 2 "YTMusic" 3 "Twitter" 4 "Reddit" 5 "TikTok")
     elif [ "$patchesrepo" = "inotia00" ]
     then
-        apps=(1 "YouTube" 2 "YouTube Music")
+        apps=(1 "YouTube" 2 "YTMusic")
     fi
-    selectapp=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'App Selection Menu' --no-lines --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
+    selectapp=$("${header[@]}" --title 'App Selection Menu' --no-lines --keep-window --no-shadow --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
-    if [ "$exitstatus" -eq "0" ]
+    if [ $exitstatus -eq 0 ]
     then
         if [ "$selectapp" -eq "1" ]
         then
@@ -211,7 +210,7 @@ selectapp()
             pkgname=com.google.android.youtube
         elif [ "$selectapp" -eq "2" ]
         then
-            appname=YouTubeMusic
+            appname=YTMusic
             pkgname=com.google.android.apps.youtube.music
         elif [ "$selectapp" -eq "3" ]
         then
@@ -225,9 +224,8 @@ selectapp()
         then
             appname=TikTok
             pkgname=com.ss.android.ugc.trill
-
         fi
-    elif [ "$exitstatus" -ne "0" ]
+    elif [ $exitstatus -ne 0 ]
     then
         mainmenu
     fi
@@ -235,11 +233,8 @@ selectapp()
 
 selectpatches()
 {  
-    selectapp
-    if ls ./patches* > /dev/null 2>&1
+    if ! ls ./patches* > /dev/null 2>&1
     then
-        :
-    else
         internet
         python3 ./python-utils/fetch-patches.py
     fi
@@ -249,10 +244,29 @@ selectpatches()
         read -r -a eachline <<< "$line"
         patches+=("${eachline[@]}")
     done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname) \(.status)"' patches.json)
-    mapfile -t choices < <(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patch Selection Menu' --no-items --no-lines --ok-label "Save" --no-cancel --separate-output --checklist "Select patches to include" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty)
-    tmp=$(mktemp)
-    jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json | jq 'map(select(IN(.patchname; $ARGS.positional[])).status = "on")' --args "${choices[@]}" > "$tmp" && mv "$tmp" ./patches.json
-    mainmenu
+    choices=($("${header[@]}" --title 'Patch Selection Menu' --no-items --no-lines --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty))
+    selectpatchstatus=$?
+    patchsaver
+}
+
+patchsaver()
+{
+    if [ $selectpatchstatus -eq 0 ]
+    then
+        tmp=$(mktemp)
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json | jq 'map(select(IN(.patchname; $ARGS.positional[])).status = "on")' --args "${choices[@]}" > "$tmp" && mv "$tmp" ./patches.json
+        mainmenu
+    elif [ $selectpatchstatus -eq 2 ]
+    then
+        tmp=$(mktemp)
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json > "$tmp" && mv "$tmp" ./patches.json
+        selectpatches
+    elif [ $selectpatchstatus -eq 3 ]
+    then
+        tmp=$(mktemp)
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "on")' patches.json > "$tmp" && mv "$tmp" ./patches.json
+        selectpatches
+    fi
 }
 
 
@@ -267,7 +281,7 @@ patchoptions()
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
-    dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --no-lines --title "Options File Editor" --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
+    "${header[@]}" --no-lines --keep-window --no-shadow --title "Options File Editor" --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
     mainmenu
 }
@@ -290,13 +304,13 @@ mountapk()
         pidof com.termux | xargs kill -9
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
-        echo "Unmounting YouTube Music..."
+        echo "Unmounting YTMusic..."
         echo "Please wait..."
         echo "This may take some time."
         su -c "pm install ./$appname-$appver.apk"
         su -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk"
-        echo "Mounting YouTube Music Revanced ..."
+        echo "Mounting YTMusic Revanced ..."
         su -mm -c 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit' > /dev/null 2>&1
         sleep 2
         su -c 'monkey -p com.google.android.apps.youtube.music 1' > /dev/null 2>&1
@@ -323,7 +337,7 @@ moveapk()
 
 dlmicrog()
 {
-    if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'MicroG Prompt' --no-items --defaultno --no-lines --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YouTube Music won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
+    if "${header[@]}" --title 'MicroG Prompt' --no-items --defaultno --no-lines --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
         then
             clear
             intro
@@ -352,7 +366,7 @@ checkpatched()
     then
         if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --no-lines --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --title 'Patched APK found' --no-items --defaultno --no-lines --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
                 rm ./"$appname"Revanced-"$appver"*
             else
@@ -366,10 +380,8 @@ checkpatched()
     else
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Patched APK found' --no-items --defaultno --no-lines --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if ! "${header[@]}" --title 'Patched APK found' --no-items --defaultno --no-lines --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
-                :
-            else
                 clear
                 intro
                 termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
@@ -390,17 +402,13 @@ sucheck()
     if su -c exit > /dev/null 2>&1
     then
         su -c "mkdir -p /data/adb/revanced"
-        if su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
+        if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
         then
-            :
-        else
             su -c "cp mount_revanced_com.google.android.youtube.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.youtube.sh"
             su -c "cp mount_revanced_com.google.android.apps.youtube.music.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.apps.youtube.music.sh"
         fi
-        if su -c "dumpsys package $pkgname" | grep -q path
+        if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            :
-        else
             sleep 0.5s
             echo "Oh No, $appname is not installed"
             echo ""
@@ -411,7 +419,6 @@ sucheck()
             exit
         fi
     else
-        sed -i '/allow-external-apps/s/# //' ~/.termux/termux.properties
         dlmicrog
     fi
 }
@@ -463,17 +470,15 @@ patchinclusion()
 
 versionselector()
 {
-    if su -c exit > /dev/null 2>&1
+    internet
+    mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+    appver=$("${header[@]}" --title "Version Selection Menu" --no-items --no-lines --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    exitstatus=$?
+    if [ $exitstatus -ne 0 ]
     then
-        if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
-        then
-            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
-        fi
-    else
-        internet
-        mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-        appver=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title "Version Selection Menu" --no-items --no-cancel --no-lines --ok-label "Select" --menu "Choose App Version" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+        mainmenu
     fi
+
 }
 
 fetchapk()
@@ -500,17 +505,20 @@ buildapp()
 {
     selectapp
     checkresource
-    if ls ./patches* > /dev/null 2>&1
+    if ! ls ./patches* > /dev/null 2>&1
     then
-        :
-    else
         internet
         python3 ./python-utils/fetch-patches.py
     fi
     if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
         sucheck
-        versionselector
+        if su -c exit > /dev/null 2>&1
+        then
+            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
+        else
+            versionselector
+        fi
         checkpatched
         fetchapk
         patchapp
@@ -534,11 +542,8 @@ buildapp()
 
 mainmenu()
 {
-    tput rc; tput ed
-    if ls ./sources* > /dev/null 2>&1
+    if ! ls ./sources* > /dev/null 2>&1
     then
-        :
-    else
         echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
     fi
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
@@ -549,15 +554,16 @@ mainmenu()
     then
         menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources")
     fi
-    mainmenu=$(dialog --begin 0 $leavecols --no-lines --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0 --title 'Select App' --no-lines --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --title 'Select App' --no-lines --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
     exitstatus=$?
-    if [ "$exitstatus" -eq "0" ]
+    if [ $exitstatus -eq 0 ]
     then
         if [ "$mainmenu" -eq "1" ]
         then
             buildapp
         elif [ "$mainmenu" -eq "2" ]
         then
+            selectapp
             selectpatches
         elif [ "$mainmenu" -eq "3" ]
         then
@@ -565,13 +571,13 @@ mainmenu()
         elif [ "$mainmenu" -eq "4" ]
         then
             fetchresources
-        elif [ "$mainmenu" -eq "5" ]
+        elif [ "$mainmenu" -eq 5 ]
         then
             patchoptions
         fi
-    elif [ "$exitstatus" -ne "0" ]
+    elif [ $exitstatus -ne 0 ]
     then
-        revive
+        terminatescript
     fi
 }
 
