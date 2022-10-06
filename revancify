@@ -51,7 +51,6 @@ then
         cp dialog-config.txt ~/.dialogrc
         cp revancify ~/../usr/bin/revancify
         bash revancify.sh
-        clear
     else
         installdependencies
         bash revancify.sh
