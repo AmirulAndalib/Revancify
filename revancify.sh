@@ -461,7 +461,7 @@ versionselector()
     then
         if ping -c 1 google.com > /dev/null 2>&1
         then
-            read -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
             appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
             exitstatus=$?
             if [ $exitstatus -ne 0 ]
@@ -473,7 +473,7 @@ versionselector()
         fi
     else
         internet
-        read -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+        readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
         appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
         exitstatus=$?
         if [ $exitstatus -ne 0 ]
