@@ -234,7 +234,7 @@ selectapp()
 
 selectpatches()
 {  
-    patchselectionheight=$(($(tput lines) - 7))
+    patchselectionheight=$(($(tput lines) - 6))
     if ! ls ./patches* > /dev/null 2>&1
     then
         internet
