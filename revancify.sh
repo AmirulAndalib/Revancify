@@ -470,6 +470,7 @@ versionselector()
             fi
         else
             appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
+            return 0
         fi
     else
         internet
