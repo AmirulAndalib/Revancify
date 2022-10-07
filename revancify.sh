@@ -234,14 +234,15 @@ selectapp()
 
 selectpatches()
 {  
+    patchselectionheight=$(($(tput lines) - 6))
     if ! ls ./patches* > /dev/null 2>&1
     then
         internet
         python3 ./python-utils/fetch-patches.py
     fi
-    declare -a patches
+    declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
-    choices=($("${header[@]}" --title 'Patch Selection Menu' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
+    choices=($("${header[@]}" --title 'Patch Selection Menu' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
     selectpatchstatus=$?
     patchsaver
 }
