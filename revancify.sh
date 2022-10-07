@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 terminatescript(){
-    clear && echo "Script terminated" && rm -rf /data/data/com.termux/files/home/storage/Revancify/*cache ; tput cnorm ; cd ~; exit
+    clear && echo "Script terminated" && rm -rf ./*cache; tput cnorm ; cd ~ ; exit
 }
 trap terminatescript SIGINT
 
@@ -13,11 +13,7 @@ internet()
     then
         return 0
     else
-        clear
-        intro
-        echo "Oops! No Internet Connection available."
-        echo "Connect to Internet and try again..."
-        sleep 3s
+        dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --msgbox "Oops! No Internet Connection available.\n\nConnect to Internet and try again later" 10 35
         mainmenu
     fi
 }
@@ -25,12 +21,12 @@ internet()
 intro()
 {
     tput civis
-    tput cs 5 $LINES
+    tput cs 4 $(tput lines)
     leave1=$(($(($(tput cols) - 34)) / 2))
     tput cm 1 $leave1
-    echo "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█"
+    echo "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█"
     tput cm 2 $leave1
-    echo "█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░"
+    echo "█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░"
     tput cm 5 0
     tput sc
 }
@@ -38,7 +34,7 @@ intro()
 leavecols=$(($(($(tput cols) - 38)) / 2))
 fullpagewidth=$(tput cols )
 fullpageheight=$(($(tput lines) - 5 ))
-header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0)
+header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0)
 
 fetchresources()
 {
@@ -295,10 +291,10 @@ mountapk()
         su -c "pm install ./$appname-$appver.apk"
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.youtube.apk"
         echo "Mounting YouTube Revanced ..."
-        su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube && exit' > /dev/null 2>&1
+        su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube' > /dev/null 2>&1
         su -c 'monkey -p com.google.android.youtube 1' > /dev/null 2>&1
         sleep 2
-        tput cnorm && cd ~
+        tput cnorm
         pidof com.termux | xargs kill -9
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
@@ -309,27 +305,24 @@ mountapk()
         su -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
         su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk"
         echo "Mounting YTMusic Revanced ..."
-        su -mm -c 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music && exit' > /dev/null 2>&1
+        su -mm -c 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music' > /dev/null 2>&1
         sleep 2
         su -c 'monkey -p com.google.android.apps.youtube.music 1' > /dev/null 2>&1
-        tput cnorm && cd ~
+        tput cnorm
         pidof com.termux | xargs kill -9
     fi
     tput cnorm
     rm -rf ./*cache
-    cd ~ || exit
-    exit
 }
 
 moveapk()
 {
     mkdir -p /storage/emulated/0/Revancify
-    mv "$appname"Revanced* /storage/emulated/0/Revancify/ &&
-    echo "$appname App saved to Revancify folder." &&
-    echo "Thanks for using Revancify..." &&
+    mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
     [[ -f Vanced_MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced_MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
-    pidof com.termux | xargs kill -9
+    mainmenu
+    return 0
 }
 
 
@@ -360,7 +353,7 @@ checkresource()
 
 checkpatched()
 {
-    if su -c exit > /dev/null 2>&1
+    if [ "$variant" = "root" ]
     then
         if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
@@ -375,22 +368,16 @@ checkpatched()
         else
             rm ./"$appname"Revanced-* > /dev/null 2>&1
         fi
-    else
+    elif [ "$variant" = "nonroot" ]
+    then
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
             if ! "${header[@]}" --title 'Patched APK found' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
-                clear
-                intro
-                termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
-                tput cnorm
-                rm -rf ./*cache
-                cd ~ || exit
-                exit
+                moveapk
             fi
         fi
     fi
-
 }
 
 arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
@@ -408,14 +395,8 @@ sucheck()
         fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            sleep 0.5s
-            echo "Oh No, $appname is not installed"
-            echo ""
-            sleep 0.5s
-            echo "Install $appname from PlayStore and run this script again."
-            tput cnorm
-            cd ~ || exit
-            exit
+            termux-open https://play.google.com/store/apps/details?id=$pkgname   
+            mainmenu
         fi
     else
         variant=nonroot
@@ -470,26 +451,64 @@ patchinclusion()
 
 versionselector()
 {
-    internet
-    mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-    exitstatus=$?
-    if [ $exitstatus -ne 0 ]
+    if ls ./"$appname"* > /dev/null 2>&1
     then
-        mainmenu
+        if ping -c 1 google.com > /dev/null 2>&1
+        then
+            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+            appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+            exitstatus=$?
+            if [ $exitstatus -ne 0 ]
+            then
+                mainmenu
+            fi
+        else
+            appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
+            return 0
+        fi
+    else
+        internet
+        readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+        appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+        exitstatus=$?
+        if [ $exitstatus -ne 0 ]
+        then
+            mainmenu
+        fi
     fi
 
 }
 
 fetchapk()
 {
-    internet
-    clear
-    intro
-    echo "Please wait while the link is being fetched..."
-    applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
-    tput rc; tput ed
-    app_dl
+    if ls ./"$appname"* > /dev/null 2>&1
+    then
+        if ping -c 1 google.com > /dev/null 2>&1
+        then
+            clear
+            intro
+            echo "Please wait while the link is being fetched..."
+            applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
+            tput rc; tput ed
+            app_dl
+        else
+            if ! "${header[@]}" --title 'APK found' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
+            then
+                internet
+            else
+                return 0
+            fi
+        fi
+
+    else
+        internet
+        clear
+        intro
+        echo "Please wait while the link is being fetched..."
+        applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
+        tput rc; tput ed
+        app_dl
+    fi
 }
 
 patchapp()
