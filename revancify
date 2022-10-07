@@ -50,10 +50,10 @@ then
         git pull > /dev/null 2>&1
         cp dialog-config.txt ~/.dialogrc
         cp revancify ~/../usr/bin/revancify
-        bash revancify.sh
+        bash main.sh
     else
         installdependencies
-        bash revancify.sh
+        bash main.sh
     fi
 else
     checkrevancify
@@ -61,7 +61,7 @@ else
     then
         tput civis
         rm -rf ./*cache
-        bash revancify.sh
+        bash main.sh
     else
         echo "Dependencies not installed. Run again with internet connection."
         exit
