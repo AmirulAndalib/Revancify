@@ -21,7 +21,7 @@ internet()
 intro()
 {
     tput civis
-    tput cs 5 $LINES
+    tput cs 4 $(tput lines)
     leave1=$(($(($(tput cols) - 34)) / 2))
     tput cm 1 $leave1
     echo "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█"
