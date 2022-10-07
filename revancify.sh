@@ -13,7 +13,8 @@ internet()
     then
         return 0
     else
-        dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --msgbox "Oops! No Internet Connection available.\n\nConnect to Internet and try again later" 5 25
+        dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --msgbox "Oops! No Internet Connection available.\n\nConnect to Internet and try again later" 10 35
+        mainmenu
     fi
 }
 
