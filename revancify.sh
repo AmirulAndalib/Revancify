@@ -401,6 +401,7 @@ sucheck()
 {
     if su -c exit > /dev/null 2>&1
     then
+        variant=root
         su -c "mkdir -p /data/adb/revanced"
         if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
         then
@@ -419,6 +420,7 @@ sucheck()
             exit
         fi
     else
+        variant=nonroot
         dlmicrog
     fi
 }
@@ -513,19 +515,22 @@ buildapp()
     if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
         sucheck
-        if su -c exit > /dev/null 2>&1
+        if [ "$variant" = "root" ]
         then
             appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
-        else
+            checkmicrogpatch
+        elif [ "$variant" = "nonroot" ]
+        then
             versionselector
         fi
         checkpatched
         fetchapk
         patchapp
-        if su -c exit > /dev/null 2>&1
+        if [ "$variant" = "root" ]
         then
             mountapk
-        else
+        elif [ "$variant" = "nonroot" ]
+        then
             moveapk
         fi
 
@@ -538,7 +543,38 @@ buildapp()
     fi
 }
 
-
+checkmicrogpatch()
+{
+    if [ "$pkgname" = "com.google.android.youtube" ] && [ "$variant" = "root" ]
+    then
+        microgstatus=$(jq -r 'map(select(.patchname = "microg-support")).status' patches.json)
+        if [ $microgstatus = "on" ]
+        then
+            if "${header[@]}" --title 'MicroG Prompt' --no-items --defaultno --keep-window --no-shadow --yesno --yes-label "Continue" --no-label "Exclude" "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            then
+                return 0
+            else
+                tmp=$(mktemp)
+                jq -r 'map(select(.patchname == "microg-support").status = "off")' patches.json > "$tmp" && mv "$tmp" ./patches.json
+                return 0
+            fi
+        fi
+    elif [ "$pkgname" = "com.google.android.apps.youtube.music" ] && [ "$variant" = "root" ]
+    then
+        microgstatus=$(jq -r 'map(select(.patchname = "microg-support")).status' patches.json)
+        if [ $microgstatus = "on" ]
+        then
+            if "${header[@]}" --title 'MicroG Prompt' --no-items --defaultno --keep-window --no-shadow --yesno --yes-label "Continue" --no-label "Exclude" "You have a rooted device and you have included a music-microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            then
+                return 0
+            else
+                tmp=$(mktemp)
+                jq -r 'map(select(.patchname == "music-microg-support").status = "off")' patches.json > "$tmp" && mv "$tmp" ./patches.json
+                return 0
+            fi
+        fi
+    fi
+}
 
 mainmenu()
 {
