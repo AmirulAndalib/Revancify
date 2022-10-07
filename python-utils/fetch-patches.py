@@ -41,6 +41,7 @@ for patchname in remotepatches:
         patchindex = remotepatches.index(patchname)
         newkey['patchname'] = patchname
         newkey['appname'] = remotejson[patchindex]['compatiblePackages'][0]['name']
+        newkey['description'] = remotejson[patchindex]['description']
         if remotejson[patchindex]['excluded'] == True:
             newkey['status'] = "off"
         elif remotejson[patchindex]['excluded'] == False:
@@ -50,6 +51,7 @@ for patchname in remotepatches:
     else:
         patchindex = remotepatches.index(patchname)
         localjson[localpatches.index(patchname)]['patchname'] = remotejson[patchindex]['name']
+        localjson[localpatches.index(patchname)]['description'] = remotejson[patchindex]['description']
         localjson[localpatches.index(patchname)]['appname'] = remotejson[patchindex]['compatiblePackages'][0]['name']
 
 

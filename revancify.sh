@@ -39,6 +39,7 @@ leavecols=$(($(($(tput cols) - 38)) / 2))
 fullpagewidth=$(tput cols )
 fullpageheight=$(($(tput lines) - 5 ))
 header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0)
+
 fetchresources()
 {
     internet
@@ -195,10 +196,10 @@ selectapp()
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
-        apps=(1 "YouTube" 2 "YTMusic" 3 "Twitter" 4 "Reddit" 5 "TikTok")
+        apps=(1 "YouTube" 2 "YT Music" 3 "Twitter" 4 "Reddit" 5 "TikTok")
     elif [ "$patchesrepo" = "inotia00" ]
     then
-        apps=(1 "YouTube" 2 "YTMusic")
+        apps=(1 "YouTube" 2 "YT Music")
     fi
     selectapp=$("${header[@]}" --title 'App Selection Menu' --keep-window --no-shadow --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
@@ -233,18 +234,15 @@ selectapp()
 
 selectpatches()
 {  
+    patchselectionheight=$(($(tput lines) - 6))
     if ! ls ./patches* > /dev/null 2>&1
     then
         internet
         python3 ./python-utils/fetch-patches.py
     fi
-    declare -a patches
-    while read -r line
-    do
-        read -r -a eachline <<< "$line"
-        patches+=("${eachline[@]}")
-    done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname) \(.status)"' patches.json)
-    choices=($("${header[@]}" --title 'Patch Selection Menu' --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty))
+    declare -a patchesinfo
+    readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
+    choices=($("${header[@]}" --title 'Patch Selection Menu' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
     selectpatchstatus=$?
     patchsaver
 }
@@ -523,7 +521,7 @@ checkmicrogpatch()
         microgstatus=$(jq -r 'map(select(.patchname == "music-microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --title 'MicroG warning' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --title 'MicroG warning' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
             then
                 return 0
             else
