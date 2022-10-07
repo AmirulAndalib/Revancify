@@ -298,7 +298,7 @@ mountapk()
         su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube' > /dev/null 2>&1
         su -c 'monkey -p com.google.android.youtube 1' > /dev/null 2>&1
         sleep 2
-        tput cnorm && cd ~
+        tput cnorm
         pidof com.termux | xargs kill -9
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
@@ -312,7 +312,7 @@ mountapk()
         su -mm -c 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music' > /dev/null 2>&1
         sleep 2
         su -c 'monkey -p com.google.android.apps.youtube.music 1' > /dev/null 2>&1
-        tput cnorm && cd ~
+        tput cnorm
         pidof com.termux | xargs kill -9
     fi
     tput cnorm
@@ -327,7 +327,8 @@ moveapk()
     echo "Thanks for using Revancify..." &&
     [[ -f Vanced_MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced_MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
-    pidof com.termux | xargs kill -9
+    mainmenu
+    return 0
 }
 
 
@@ -379,11 +380,7 @@ checkpatched()
         then
             if ! "${header[@]}" --title 'Patched APK found' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
-                clear
-                intro
-                termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
-                tput cnorm
-                rm -rf ./*cache
+                moveapk
             fi
         fi
     fi
@@ -404,13 +401,6 @@ sucheck()
         fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            sleep 0.5s
-            echo "Oh No, $appname is not installed"
-            echo ""
-            echo "Please install $appname from PlayStore"
-            echo ""
-            echo "Opening PlayStore..."
-            sleep 2s
             termux-open https://play.google.com/store/apps/details?id=$pkgname   
             mainmenu
         fi
@@ -467,13 +457,29 @@ patchinclusion()
 
 versionselector()
 {
-    internet
-    mapfile -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-    exitstatus=$?
-    if [ $exitstatus -ne 0 ]
+    if ls ./"$appname"Revanced* > /dev/null 2>&1
     then
-        mainmenu
+        if ping -c 1 google.com > /dev/null 2>&1
+        then
+            read -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+            appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+            exitstatus=$?
+            if [ $exitstatus -ne 0 ]
+            then
+                mainmenu
+            fi
+        else
+            appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
+        fi
+    else
+        internet
+        read -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+        appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+        exitstatus=$?
+        if [ $exitstatus -ne 0 ]
+        then
+            mainmenu
+        fi
     fi
 
 }
