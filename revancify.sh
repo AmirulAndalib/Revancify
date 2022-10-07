@@ -69,7 +69,7 @@ fetchresources()
         patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) #get version
         if [ "$patches_latest" = "$patches_available" ]
         then
-            echo "Latest Patches already exixts."
+            echo "Latest Patches already exists."
             echo ""
             wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
@@ -95,7 +95,7 @@ fetchresources()
         cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) #get version
         if [ "$cli_latest" = "$cli_available" ]
         then
-            echo "Latest CLI already exists."
+            echo "Latest CLI already exist."
             echo ""
             wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
@@ -158,7 +158,7 @@ changesource()
     then
         selectedsolurce=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
     fi
-    selectsource=$("${header[@]}" --title 'Source Selection Menu' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Select Source" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
+    selectsource=$("${header[@]}" --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
         if [ "$patchesrepo" = "revanced" ]
@@ -197,7 +197,7 @@ selectapp()
     then
         apps=(1 "YouTube" 2 "YT Music")
     fi
-    selectapp=$("${header[@]}" --title 'App Selection Menu' --keep-window --no-shadow --ok-label "Select" --menu "Select App" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
+    selectapp=$("${header[@]}" --title ' App Selection Menu ' --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
@@ -238,7 +238,7 @@ selectpatches()
     fi
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
-    choices=($("${header[@]}" --title 'Patch Selection Menu' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
+    choices=($("${header[@]}" --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
     selectpatchstatus=$?
     patchsaver
 }
@@ -275,7 +275,7 @@ patchoptions()
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
-    "${header[@]}" --keep-window --no-shadow --title "Options File Editor" --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
+    "${header[@]}" --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
     mainmenu
 }
@@ -328,7 +328,7 @@ moveapk()
 
 dlmicrog()
 {
-    if "${header[@]}" --title 'MicroG Prompt' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
+    if "${header[@]}" --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
         then
             clear
             intro
@@ -357,7 +357,7 @@ checkpatched()
     then
         if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if "${header[@]}" --title 'Patched APK found' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
                 rm ./"$appname"Revanced-"$appver"*
             else
@@ -372,7 +372,7 @@ checkpatched()
     then
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if ! "${header[@]}" --title 'Patched APK found' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if ! "${header[@]}" --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
                 moveapk
             fi
@@ -469,7 +469,7 @@ versionselector()
     else
         internet
         readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-        appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+        appver=$("${header[@]}" --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
         exitstatus=$?
         if [ $exitstatus -ne 0 ]
         then
@@ -492,7 +492,7 @@ fetchapk()
             tput rc; tput ed
             app_dl
         else
-            if ! "${header[@]}" --title 'APK found' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
+            if ! "${header[@]}" --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
             then
                 internet
             else
@@ -526,7 +526,7 @@ checkmicrogpatch()
         microgstatus=$(jq -r 'map(select(.patchname == "microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --title 'MicroG warning' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
             then
                 return 0
             else
@@ -540,7 +540,7 @@ checkmicrogpatch()
         microgstatus=$(jq -r 'map(select(.patchname == "music-microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --title 'MicroG warning' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
             then
                 return 0
             else
@@ -607,7 +607,7 @@ mainmenu()
     then
         menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources")
     fi
-    mainmenu=$("${header[@]}" --title 'Select App' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Select Option" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
