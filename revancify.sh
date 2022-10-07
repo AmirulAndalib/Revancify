@@ -240,12 +240,8 @@ selectpatches()
         python3 ./python-utils/fetch-patches.py
     fi
     declare -a patches
-    while read -r line
-    do
-        read -r -a eachline <<< "$line"
-        patches+=("${eachline[@]}")
-    done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname) \(.status)"' patches.json)
-    choices=($("${header[@]}" --title 'Patch Selection Menu' --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patches[@]}" 2>&1 >/dev/tty))
+    readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
+    choices=($("${header[@]}" --title 'Patch Selection Menu' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use Spacebar to include or exclude patch" $fullpageheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
     selectpatchstatus=$?
     patchsaver
 }
