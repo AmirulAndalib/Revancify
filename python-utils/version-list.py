@@ -3,20 +3,27 @@ from fetcher import fetch
 from bs4 import BeautifulSoup
 import re
 import sys
+import json
 
 versionlist=[]
 
 def bsurl(url):
     return fetch(url).bsurl()
 
+with open('sources.json', 'r') as sourcesfile:
+    sourcesjson = json.load(sourcesfile)
+
+patchesrepo = sourcesjson[0]['patches']['repo']
+patchesbranch = sourcesjson[0]['patches']['branch']
+patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
 
 if sys.argv[1] == "YouTube":
-    for json in (requests.get('https://raw.githubusercontent.com/revanced/revanced-patches/main/patches.json')).json():
+    for json in (requests.get(patchesurl)).json():
         if json['name'] == 'general-ads':
             for appver in (((json['compatiblePackages'])[0])['versions'])[-1:-11:-1]:
                 print(appver)
 elif sys.argv[1] == "YTMusic":
-    for json in (requests.get('https://raw.githubusercontent.com/revanced/revanced-patches/main/patches.json')).json():
+    for json in (requests.get(patchesurl)).json():
         if json['name'] == 'compact-header':
             for appver in (((json['compatiblePackages'])[0])['versions'])[::-1]:
                 print(appver)
