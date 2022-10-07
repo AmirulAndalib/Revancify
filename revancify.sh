@@ -457,7 +457,7 @@ patchinclusion()
 
 versionselector()
 {
-    if ls ./"$appname"Revanced* > /dev/null 2>&1
+    if ls ./"$appname"* > /dev/null 2>&1
     then
         if ping -c 1 google.com > /dev/null 2>&1
         then
