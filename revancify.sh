@@ -506,10 +506,10 @@ checkmicrogpatch()
 {
     if [ "$pkgname" = "com.google.android.youtube" ] && [ "$variant" = "root" ]
     then
-        microgstatus=$(jq -r 'map(select(.patchname == "microg-support")).status' patches.json)
+        microgstatus=$(jq -r 'map(select(.patchname == "microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --title 'MicroG Patch Prompt' --no-items --defaultno --keep-window --no-shadow --yesno --yes-label "Continue" --no-label "Exclude" "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --title 'MicroG warning' --no-items --defaultno --keep-window --no-shadow --yesno --yes-label "Continue" --no-label "Exclude" "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
             then
                 return 0
             else
@@ -520,7 +520,7 @@ checkmicrogpatch()
         fi
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ] && [ "$variant" = "root" ]
     then
-        microgstatus=$(jq -r 'map(select(.patchname == "microg-support")).status' patches.json)
+        microgstatus=$(jq -r 'map(select(.patchname == "microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
             if "${header[@]}" --title 'MicroG Prompt' --no-items --defaultno --keep-window --no-shadow --yesno --yes-label "Continue" --no-label "Exclude" "You have a rooted device and you have included a music-microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
