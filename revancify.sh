@@ -492,7 +492,7 @@ fetchapk()
             tput rc; tput ed
             app_dl
         else
-            if ! "${header[@]}" --title 'APK found' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\n Do you want to continue with this apk file?" $fullpageheight $fullpagewidth
+            if ! "${header[@]}" --title 'APK found' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
             then
                 internet
             else
