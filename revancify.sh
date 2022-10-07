@@ -481,13 +481,34 @@ versionselector()
 
 fetchapk()
 {
-    internet
-    clear
-    intro
-    echo "Please wait while the link is being fetched..."
-    applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
-    tput rc; tput ed
-    app_dl
+    if ls ./"$appname"* > /dev/null 2>&1
+    then
+        if ping -c 1 google.com > /dev/null 2>&1
+        then
+            clear
+            intro
+            echo "Please wait while the link is being fetched..."
+            applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
+            tput rc; tput ed
+            app_dl
+        else
+            if ! "${header[@]}" --title 'APK found' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\n Do you want to continue with this apk file?" $fullpageheight $fullpagewidth
+            then
+                internet
+            else
+                return 0
+            fi
+        fi
+
+    else
+        internet
+        clear
+        intro
+        echo "Please wait while the link is being fetched..."
+        applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
+        tput rc; tput ed
+        app_dl
+    fi
 }
 
 patchapp()
