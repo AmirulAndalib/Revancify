@@ -397,6 +397,9 @@ sucheck()
                 return 0
             fi
             fetchapk
+            checkpatched
+            patchapp
+            moveapk
         fi
     else
         variant=nonroot
