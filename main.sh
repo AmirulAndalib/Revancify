@@ -498,6 +498,8 @@ fetchapk()
                 internet
             else
                 appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
+                clear
+                intro
                 return 0
             fi
         fi
