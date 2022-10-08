@@ -281,34 +281,19 @@ patchoptions()
 }
 
 mountapk()
-{
+{   
+    PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done && pm install ./$APPNAME-$APPVER.apk;\
+    cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/"$PKGNAME".apk &&\
+    stockapp=$(pm path $PKGNAME | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/"$PKGNAME.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube'
+    sleep 1
     if [ "$pkgname" = "com.google.android.youtube" ]
     then
-        echo "Unmounting YouTube..."
-        echo "Please wait..."
-        echo "This may take some time."
-        su -c 'grep com.google.android.youtube /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done && am force-stop com.google.android.youtube'
-        su -c "pm install ./$appname-$appver.apk"
-        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.youtube.apk"
-        echo "Mounting YouTube Revanced ..."
-        su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube' > /dev/null 2>&1
-        sleep 1
         su -c 'am start -n com.google.android.youtube/com.google.android.apps.youtube.app.watchwhile.WatchWhileActivity' > /dev/null 2>&1
-        su -c 'pidof com.termux | xargs kill -9'
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
-        echo "Unmounting YTMusic..."
-        echo "Please wait..."
-        echo "This may take some time."
-        su -c "pm install ./$appname-$appver.apk"
-        su -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
-        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk"
-        echo "Mounting YTMusic Revanced ..."
-        su -mm -c 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music' > /dev/null 2>&1
-        sleep 1
         su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
-        su -c 'pidof com.termux | xargs kill -9'
     fi
+    su -c 'pidof com.termux | xargs kill -9'
 }
 
 moveapk()
