@@ -497,7 +497,7 @@ fetchapk()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-            applink=$(cat link.txt) && rm link.txt
+            applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1 
             app_dl
         else
             if ! "${header[@]}" --begin 5 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
@@ -522,7 +522,7 @@ patchapp()
 {
     echo "Patching $appname..."
     setargs
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive | grep -v "excluded" | grep -v "WARNING" &&
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive | grep -v "excluded" &&
     sleep 3
 }
 
