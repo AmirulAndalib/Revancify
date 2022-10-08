@@ -307,6 +307,7 @@ mountapk()
     then
         su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
     fi
+    termux-wake-unlock
     su -c 'pidof com.termux | xargs kill -9'
 }
 
