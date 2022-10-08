@@ -13,7 +13,7 @@ internet()
     then
         return 0
     else
-        dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --msgbox "Oops! No Internet Connection available.\n\nConnect to Internet and try again later" 10 35
+        "${header[@]}" --msgbox "Oops! No Internet Connection available.\n\nConnect to Internet and try again later" 10 35
         mainmenu
     fi
 }
@@ -34,7 +34,7 @@ intro()
 leavecols=$(($(($(tput cols) - 38)) / 2))
 fullpagewidth=$(tput cols )
 fullpageheight=$(($(tput lines) - 5 ))
-header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget --begin 5 0)
+header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
 fetchresources()
 {
@@ -69,7 +69,7 @@ fetchresources()
         patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) #get version
         if [ "$patches_latest" = "$patches_available" ]
         then
-            echo "Latest Patches already exists."
+            echo "Latest Patches already exist."
             echo ""
             wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
@@ -95,7 +95,7 @@ fetchresources()
         cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) #get version
         if [ "$cli_latest" = "$cli_available" ]
         then
-            echo "Latest CLI already exist."
+            echo "Latest CLI already exists."
             echo ""
             wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
@@ -121,7 +121,7 @@ fetchresources()
         int_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) #get version
         if [ "$int_latest" = "$int_available" ]
         then
-            echo "Latest Integrations already exists."
+            echo "Latest Integrations already exist."
             echo ""
             wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
@@ -158,7 +158,7 @@ changesource()
     then
         selectedsolurce=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
     fi
-    selectsource=$("${header[@]}" --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
+    selectsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
         if [ "$patchesrepo" = "revanced" ]
@@ -197,7 +197,7 @@ selectapp()
     then
         apps=(1 "YouTube" 2 "YT Music")
     fi
-    selectapp=$("${header[@]}" --title ' App Selection Menu ' --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
+    selectapp=$("${header[@]}" --begin 5 0 --title ' App Selection Menu ' --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
@@ -238,7 +238,7 @@ selectpatches()
     fi
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
-    choices=($("${header[@]}" --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
+    choices=($("${header[@]}" --begin 5 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
     selectpatchstatus=$?
     patchsaver
 }
@@ -275,40 +275,37 @@ patchoptions()
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
-    "${header[@]}" --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
+    "${header[@]}" --begin 5 0 --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
     mainmenu
 }
 
 mountapk()
-{
+{   
+    clear
+    intro
+    echo "Unmounting and Mouting $appname..."
+    echo "This may take a while..."
+    PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
+    pm install ./"$APPNAME"-"$APPVER".apk &&\
+    cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete &&\
+    mv /data/local/tmp/revanced.delete /data/adb/revanced/"$PKGNAME".apk &&\
+    stockapp=$(pm path $PKGNAME | grep base | sed "s/package://g") &&\
+    revancedapp=/data/adb/revanced/"$PKGNAME".apk &&\
+    chmod 644 "$revancedapp" &&\
+    chown system:system "$revancedapp" &&\
+    chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
+    mount -o bind "$revancedapp" "$stockapp" &&\
+    am force-stop $PKGNAME'
+    sleep 1
     if [ "$pkgname" = "com.google.android.youtube" ]
     then
-        echo "Unmounting YouTube..."
-        echo "Please wait..."
-        echo "This may take some time."
-        su -c 'grep com.google.android.youtube /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done && am force-stop com.google.android.youtube'
-        su -c "pm install ./$appname-$appver.apk"
-        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.youtube.apk"
-        echo "Mounting YouTube Revanced ..."
-        su -mm -c 'stockapp=$(pm path com.google.android.youtube | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.youtube.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.youtube' > /dev/null 2>&1
-        sleep 1
         su -c 'am start -n com.google.android.youtube/com.google.android.apps.youtube.app.watchwhile.WatchWhileActivity' > /dev/null 2>&1
-        su -c 'pidof com.termux | xargs kill -9'
     elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
     then
-        echo "Unmounting YTMusic..."
-        echo "Please wait..."
-        echo "This may take some time."
-        su -c "pm install ./$appname-$appver.apk"
-        su -c 'grep com.google.android.apps.youtube.music /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
-        su -c "cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/com.google.android.apps.youtube.music.apk"
-        echo "Mounting YTMusic Revanced ..."
-        su -mm -c 'stockapp=$(pm path com.google.android.apps.youtube.music | grep base | sed 's/package://g') && revancedapp=/data/adb/revanced/com.google.android.apps.youtube.music.apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop com.google.android.apps.youtube.music' > /dev/null 2>&1
-        sleep 1
         su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
-        su -c 'pidof com.termux | xargs kill -9'
     fi
+    su -c 'pidof com.termux | xargs kill -9'
 }
 
 moveapk()
@@ -324,7 +321,7 @@ moveapk()
 
 dlmicrog()
 {
-    if "${header[@]}" --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
+    if "${header[@]}" --begin 5 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
         then
             clear
             intro
@@ -354,12 +351,10 @@ checkpatched()
     then
         if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if "${header[@]}" --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --begin 5 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
                 rm ./"$appname"Revanced-"$appver"*
             else
-                clear
-                intro
                 mountapk
             fi
         else
@@ -369,7 +364,7 @@ checkpatched()
     then
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if ! "${header[@]}" --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if ! "${header[@]}" --begin 5 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
             then
                 moveapk
             fi
@@ -392,8 +387,19 @@ sucheck()
         fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            termux-open https://play.google.com/store/apps/details?id=$pkgname   
-            mainmenu
+            internet
+            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+            appver=$("${header[@]}" --begin 5 0 --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+            exitstatus=$?
+            if [ $exitstatus -ne 0 ]
+            then
+                mainmenu
+                return 0
+            fi
+            fetchapk
+            checkpatched
+            patchapp
+            moveapk
         fi
     else
         variant=nonroot
@@ -404,6 +410,8 @@ sucheck()
 # App Downloader
 app_dl()
 {
+    clear
+    intro
     internet
     if ls ./"$appname"-* > /dev/null 2>&1
     then
@@ -453,7 +461,7 @@ versionselector()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-            appver=$("${header[@]}" --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+            appver=$("${header[@]}" --begin 5 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
             exitstatus=$?
             if [ $exitstatus -ne 0 ]
             then
@@ -466,7 +474,7 @@ versionselector()
     else
         internet
         readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-        appver=$("${header[@]}" --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+        appver=$("${header[@]}" --begin 5 0 --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
         exitstatus=$?
         if [ $exitstatus -ne 0 ]
         then
@@ -482,28 +490,23 @@ fetchapk()
     then
         if ping -c 1 google.com > /dev/null 2>&1
         then
-            clear
-            intro
-            echo "Please wait while the link is being fetched..."
-            applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
-            tput rc; tput ed
+            python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
+            applink=$(cat link.txt) && rm link.txt
             app_dl
         else
-            if ! "${header[@]}" --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
+            if ! "${header[@]}" --begin 5 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
             then
                 internet
             else
+                appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
                 return 0
             fi
         fi
 
     else
         internet
-        clear
-        intro
-        echo "Please wait while the link is being fetched..."
-        applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
-        tput rc; tput ed
+        python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
+        applink=$(cat link.txt) && rm link.txt
         app_dl
     fi
 }
@@ -523,7 +526,7 @@ checkmicrogpatch()
         microgstatus=$(jq -r 'map(select(.patchname == "microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --begin 5 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
             then
                 return 0
             else
@@ -537,7 +540,7 @@ checkmicrogpatch()
         microgstatus=$(jq -r 'map(select(.patchname == "music-microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --begin 5 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
             then
                 return 0
             else
@@ -564,7 +567,8 @@ buildapp()
         sucheck
         if [ "$variant" = "root" ]
         then
-            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
+            rootver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2)
+            appver=${rootver:=$appver}
             checkmicrogpatch
         elif [ "$variant" = "nonroot" ]
         then
@@ -604,7 +608,7 @@ mainmenu()
     then
         menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources")
     fi
-    mainmenu=$("${header[@]}" --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
