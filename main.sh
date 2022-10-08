@@ -382,16 +382,7 @@ sucheck()
         su -c "mkdir -p /data/adb/revanced"
         if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
         then
-            PKGNAME=$pkgname su -c 'echo """#!/system/bin/sh
-            MAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin
-            MIRROR=\"$MAGISKTMP/.magisk/mirror\"
-            while [ \"\$(getprop sys.boot_completed | tr -d '\r')\" != \"1\" ]; do sleep 1; done
-
-            base_path=\"/data/adb/revanced/"$PKGNAME".apk\"
-            stock_path=\$( pm path $PKGNAME | grep base | sed 's/package://g' )
-
-            chcon u:object_r:apk_data_file:s0 \$base_path
-            mount -o bind \$MIRROR\$base_path \$stock_path""" > /data/adb/service.d/mount_revanced_$PKGNAME.sh'
+            PKGNAME=$pkgname su -c 'echo """#!/system/bin/sh\nMAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin\nMIRROR=\"$MAGISKTMP/.magisk/mirror\"\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$PKGNAME".apk\"\nstock_path=\$( pm path $PKGNAME | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$MIRROR\$base_path \$stock_path""" > /data/adb/service.d/mount_revanced_$PKGNAME.sh'
         fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
