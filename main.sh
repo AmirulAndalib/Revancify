@@ -379,7 +379,7 @@ sucheck()
         then
             internet
             readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-            chosenver=$("${header[@]}" --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+            appver=$("${header[@]}" --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
             exitstatus=$?
             if [ $exitstatus -ne 0 ]
             then
@@ -558,7 +558,7 @@ buildapp()
         if [ "$variant" = "root" ]
         then
             rootver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2)
-            appver=${rootver:=$chosenver}
+            appver=${rootver:=$appver}
             checkmicrogpatch
         elif [ "$variant" = "nonroot" ]
         then
