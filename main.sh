@@ -522,7 +522,7 @@ patchapp()
 {
     echo "Patching $appname..."
     setargs
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive | grep -e -v "excluded" &&
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive | grep -v "excluded" | grep -v "WARNING" &&
     sleep 3
 }
 
