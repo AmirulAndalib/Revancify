@@ -382,7 +382,7 @@ sucheck()
         su -c "mkdir -p /data/adb/revanced"
         if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
         then
-            PKGNAME= $pkgname su -c 'echo """#!/system/bin/sh
+            PKGNAME=$pkgname su -c 'echo """#!/system/bin/sh
             MAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin
             MIRROR=\"$MAGISKTMP/.magisk/mirror\"
             while [ \"\$(getprop sys.boot_completed | tr -d '\r')\" != \"1\" ]; do sleep 1; done
