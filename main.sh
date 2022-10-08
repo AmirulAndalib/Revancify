@@ -382,8 +382,16 @@ sucheck()
         su -c "mkdir -p /data/adb/revanced"
         if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
         then
-            su -c "cp mount_revanced_com.google.android.youtube.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.youtube.sh"
-            su -c "cp mount_revanced_com.google.android.apps.youtube.music.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.apps.youtube.music.sh"
+            PKGNAME= $pkgname su -c 'echo """#!/system/bin/sh
+            MAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin
+            MIRROR=\"$MAGISKTMP/.magisk/mirror\"
+            while [ \"\$(getprop sys.boot_completed | tr -d '\r')\" != \"1\" ]; do sleep 1; done
+
+            base_path=\"/data/adb/revanced/"$PKGNAME".apk\"
+            stock_path=\$( pm path $PKGNAME | grep base | sed 's/package://g' )
+
+            chcon u:object_r:apk_data_file:s0 \$base_path
+            mount -o bind \$MIRROR\$base_path \$stock_path""" > /data/adb/service.d/mount_revanced_$PKGNAME.sh'
         fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
