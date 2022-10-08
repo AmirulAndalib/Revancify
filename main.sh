@@ -396,6 +396,7 @@ sucheck()
                 mainmenu
                 return 0
             fi
+            fetchapk
         fi
     else
         variant=nonroot
