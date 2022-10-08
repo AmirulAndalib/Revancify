@@ -448,9 +448,13 @@ app_dl()
     fi
 }
 
-patchinclusion()
+setargs()
 {
     includepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "on"))[].patchname' patches.json | sed "s/^/-i /g"))
+    if [ "$patchesrepo" = "inotia00"] && [ "$appname" = "YouTube" ]
+    then
+        riplibs="--rip-lib x86_64 --rip-lib x86"
+    fi
 }
 
 versionselector()
@@ -499,7 +503,6 @@ fetchapk()
             else
                 appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
                 clear
-                intro
                 return 0
             fi
         fi
@@ -515,8 +518,8 @@ fetchapk()
 patchapp()
 {
     echo "Patching $appname..."
-    patchinclusion
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive &&
+    setagrgs
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches $riplibs --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive &&
     sleep 3
 }
 
