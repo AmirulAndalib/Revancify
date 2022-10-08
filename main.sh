@@ -153,12 +153,12 @@ changesource()
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
-        selectedsolurce=(1 "Official: Revanced" on 2 "Custom: Inotia00" off)
+        selectedsource=(1 "Official: Revanced" on 2 "Custom: Inotia00" off)
     elif [ "$patchesrepo" = "inotia00" ]
     then
-        selectedsolurce=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
+        selectedsource=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
     fi
-    selectsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
+    selectsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsource[@]}" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
         if [ "$patchesrepo" = "revanced" ]
@@ -451,7 +451,7 @@ app_dl()
 setargs()
 {
     includepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "on"))[].patchname' patches.json | sed "s/^/-i /g"))
-    if [ "$patchesrepo" = "inotia00"] && [ "$appname" = "YouTube" ]
+    if [ "$patchesrepo" = "inotia00" ] && [ "$appname" = "YouTube" ]
     then
         riplibs="--rip-lib x86_64 --rip-lib x86"
     fi
@@ -518,7 +518,7 @@ fetchapk()
 patchapp()
 {
     echo "Patching $appname..."
-    setagrgs
+    setargs
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches $riplibs --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive &&
     sleep 3
 }
