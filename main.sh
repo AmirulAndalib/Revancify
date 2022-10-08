@@ -309,13 +309,11 @@ mountapk()
         su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
         su -c 'pidof com.termux | xargs kill -9'
     fi
-    tput cnorm
-    rm -rf ./*cache
 }
 
 moveapk()
 {
-    mkdir -p /storage/emulated/0/Revancify
+    mkdir -p /storage/emulated/0/Revancify/
     mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
     [[ -f Vanced_MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced_MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
@@ -332,7 +330,8 @@ dlmicrog()
             intro
             wget -q -c "https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk" -O "Vanced_MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
-            mv "Vanced_MicroG.apk" /storage/emulated/0/Revancify
+            mkdir -p /storage/emulated/0/Revancify
+            mv "Vanced_MicroG.apk" /storage/emulated/0/Revancify/
             echo MicroG App saved to Revancify folder.
             sleep 1s
     fi
