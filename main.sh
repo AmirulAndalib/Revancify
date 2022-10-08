@@ -284,6 +284,8 @@ mountapk()
 {   
     clear
     intro
+    echo "Unmounting and Mouting $appname..."
+    echo "This may take a while..."
     PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done && pm install ./"$APPNAME"-"$APPVER".apk && cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete && mv /data/local/tmp/revanced.delete /data/adb/revanced/"$PKGNAME".apk && stockapp=$(pm path $PKGNAME | grep base | sed "s/package://g") && revancedapp=/data/adb/revanced/"$PKGNAME".apk && chmod 644 "$revancedapp" && chown system:system "$revancedapp" && chcon u:object_r:apk_data_file:s0 "$revancedapp" && mount -o bind "$revancedapp" "$stockapp" && am force-stop $PKGNAME'
     sleep 1
     if [ "$pkgname" = "com.google.android.youtube" ]
@@ -375,8 +377,15 @@ sucheck()
         fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            termux-open https://play.google.com/store/apps/details?id=$pkgname   
-            mainmenu
+            internet
+            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+            chosenver=$("${header[@]}" --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+            exitstatus=$?
+            if [ $exitstatus -ne 0 ]
+            then
+                mainmenu
+                return 0
+            fi
         fi
     else
         variant=nonroot
@@ -548,7 +557,8 @@ buildapp()
         sucheck
         if [ "$variant" = "root" ]
         then
-            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 )
+            rootver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2)
+            appver=${rootver:=$chosenver}
             checkmicrogpatch
         elif [ "$variant" = "nonroot" ]
         then
