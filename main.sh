@@ -490,7 +490,8 @@ fetchapk()
     then
         if ping -c 1 google.com > /dev/null 2>&1
         then
-            applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch") | "${header[@]}" --progressbox "Please wait while the link is being fetched !" 10 35
+            python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
+            applink=$(cat link.txt) && rm link.txt
             app_dl
         else
             if ! "${header[@]}" --begin 5 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
@@ -504,11 +505,8 @@ fetchapk()
 
     else
         internet
-        clear
-        intro
-        echo "Please wait while the link is being fetched..."
-        applink=$(python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch")
-        tput rc; tput ed
+        python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
+        applink=$(cat link.txt) && rm link.txt
         app_dl
     fi
 }
