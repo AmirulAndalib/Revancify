@@ -9,7 +9,7 @@ trap terminatescript SIGINT
 
 setup()
 {
-    if [ ! $(jq '.[0] | has("sourceMaintainer")' sources.json) = true ] > /dev/null 2>&1
+    if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
     then
         echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "jsonBranch" : "main", "availableApps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "jsonBranch" : "revanced_extended", "availableApps": ["Youtube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
     fi
