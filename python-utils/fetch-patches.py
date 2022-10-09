@@ -6,8 +6,10 @@ localjson = None
 with open('sources.json', 'r') as sourcesfile:
     sourcesjson = json.load(sourcesfile)
 
-patchesrepo = sourcesjson[0]['patches']['repo']
-patchesbranch = sourcesjson[0]['patches']['branch']
+for source in sourcesjson:
+    if source['source_status'] == "on":
+        patchesrepo = source['source_maintainer']
+        patchesbranch = source['source_info']['patches_branch']
 
 def openjson():
     global localjson

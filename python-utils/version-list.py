@@ -13,8 +13,12 @@ def bsurl(url):
 with open('sources.json', 'r') as sourcesfile:
     sourcesjson = json.load(sourcesfile)
 
-patchesrepo = sourcesjson[0]['patches']['repo']
-patchesbranch = sourcesjson[0]['patches']['branch']
+
+for source in sourcesjson:
+    if source['source_status'] == "on":
+        patchesrepo = source['source_maintainer']
+        patchesbranch = source['source_info']['patches_branch']
+
 patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
 
 if sys.argv[1] == "YouTube":

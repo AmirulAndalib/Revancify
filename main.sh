@@ -11,7 +11,7 @@ setup()
 {
     if ! ls ./sources* > /dev/null 2>&1
     then
-        echo '[{"source_maintainer" : "revanced", "source_status" : "on", "source_info" : {"patches_branch" : "main", "cli_branch" : "main", "integrations_branch" : "main", "available_apps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"]}},{"source_maintainer" : "inotia00", "source_status" : "off", "source_info" : {"patches_branch" : "revanced_extended", "cli_branch" : "riplib", "integrations_branch" : "revanced_extended",  "available_apps": ["Youtube", "YTMusic"]}}]' | jq '.' > sources.json
+        echo '[{"source_maintainer" : "revanced", "source_status" : "on", "source_info" : {"patches_branch" : "main", "cli_branch" : "main", "integrations_branch" : "main", "available_apps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"]}},{"source_maintainer" : "inotia00", "source_status" : "off", "source_info" : {"patches_branch" : "revanced-extended", "cli_branch" : "riplib", "integrations_branch" : "revanced-extended",  "available_apps": ["Youtube", "YTMusic"]}}]' | jq '.' > sources.json
     fi
 }
 
@@ -62,11 +62,11 @@ fetchresources()
     int_latest="${revanced_latest[2]}"
 
 
-    patchesbranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.patches-branch' sources.json)
+    patchesbranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.patches_branch' sources.json)
 
-    clibranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.cli-branch' sources.json)
+    clibranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.cli_branch' sources.json)
     
-    integrationsbranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.integrations-branch' sources.json)
+    integrationsbranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.integrations_branch' sources.json)
     #check patch
     if ls ./revanced-patches-* > /dev/null 2>&1
     then
@@ -154,10 +154,15 @@ fetchresources()
 changesource()
 {
     internet
+    currentsource=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
     allsources=($(jq -r '.[] | "\(.source_maintainer) \(.source_status)"' sources.json))
     selectedsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
     tmp=$(mktemp)
     jq -r 'map(select(.).source_status = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.source_maintainer == $selectedsource).source_status = "on")' > "$tmp" && mv "$tmp" sources.json
+    if [ "$currentsource" != "$selectedsource" ]
+    then
+        rm revanced-* > /dev/null 2>&1
+    fi
     fetchresources
     mainmenu
 }
