@@ -157,8 +157,8 @@ changesource()
     if [ "$currentsource" != "$selectedsource" ]
     then
         rm revanced-* > /dev/null 2>&1
+        fetchresources
     fi
-    fetchresources
     mainmenu
 }
 
