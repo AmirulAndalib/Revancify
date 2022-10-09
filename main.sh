@@ -249,10 +249,7 @@ patchoptions()
 
 mountapk()
 {   
-    clear
-    intro
-    echo "Unmounting and Mouting $appname..."
-    echo "This may take a while..."
+    "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
     PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     pm install ./"$APPNAME"-"$APPVER".apk &&\
     cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete &&\
@@ -263,7 +260,7 @@ mountapk()
     chown system:system "$revancedapp" &&\
     chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
     mount -o bind "$revancedapp" "$stockapp" &&\
-    am force_stop $PKGNAME'
+    am force_stop $PKGNAME' > /dev/null 2>&1
     sleep 1
     if [ "$pkgname" = "com.google.android.youtube" ]
     then
@@ -272,7 +269,6 @@ mountapk()
     then
         su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
     fi
-    termux-wake-unlock
     su -c 'pidof com.termux | xargs kill -9'
 }
 
@@ -497,9 +493,6 @@ fetchapk()
 
 patchapp()
 {
-    clear
-    intro
-    echo "Patching $appname..."
     setargs
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | "${header[@]}" --begin 5 0 --title " Patching $appname " --progressbox $fullpageheight $fullpagewidth &&
     sleep 3
