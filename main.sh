@@ -154,7 +154,6 @@ fetchresources()
 changesource()
 {
     internet
-    currentsource=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
     allsources=($(jq -r '.[] | "\(.source_maintainer) \(.source_status)"' sources.json))
     selectedsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
     tmp=$(mktemp)
