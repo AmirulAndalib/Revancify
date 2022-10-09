@@ -7,8 +7,8 @@ with open('sources.json', 'r') as sourcesfile:
     sourcesjson = json.load(sourcesfile)
 
 for source in sourcesjson:
-    if source['source_status'] == "on":
-        sourcemaintainer = source['source_maintainer']
+    if source['sourceStatus'] == "on":
+        sourcemaintainer = source['sourceMaintainer']
 
 
 patchesurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-patches/releases/latest"])

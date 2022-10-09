@@ -7,9 +7,9 @@ with open('sources.json', 'r') as sourcesfile:
     sourcesjson = json.load(sourcesfile)
 
 for source in sourcesjson:
-    if source['source_status'] == "on":
-        patchesrepo = source['source_maintainer']
-        patchesbranch = source['json_branch']
+    if source['sourceStatus'] == "on":
+        patchesrepo = source['sourceMaintainer']
+        patchesbranch = source['jsonBranch']
 
 def openjson():
     global localjson
