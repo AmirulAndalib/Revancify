@@ -153,12 +153,12 @@ changesource()
     patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
     if [ "$patchesrepo" = "revanced" ]
     then
-        selectedsolurce=(1 "Official: Revanced" on 2 "Custom: Inotia00" off)
+        selectedsource=(1 "Official: Revanced" on 2 "Custom: Inotia00" off)
     elif [ "$patchesrepo" = "inotia00" ]
     then
-        selectedsolurce=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
+        selectedsource=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
     fi
-    selectsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsolurce[@]}" 2>&1> /dev/tty)
+    selectsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsource[@]}" 2>&1> /dev/tty)
     if [ "$selectsource" -eq "1" ]
     then
         if [ "$patchesrepo" = "revanced" ]
@@ -179,7 +179,9 @@ changesource()
             echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
         else
             echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
-            rm revanced-patches* && rm revanced-integrations* && rm revanced-cli* > /dev/null 2>&1
+            rm revanced-patches* > /dev/null 2>&1
+            rm revanced-integrations* > /dev/null 2>&1
+            rm revanced-cli* > /dev/null 2>&1
             python3 ./python-utils/fetch-patches.py
             fetchresources
         fi
@@ -305,6 +307,7 @@ mountapk()
     then
         su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
     fi
+    termux-wake-unlock
     su -c 'pidof com.termux | xargs kill -9'
 }
 
@@ -382,8 +385,7 @@ sucheck()
         su -c "mkdir -p /data/adb/revanced"
         if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
         then
-            su -c "cp mount_revanced_com.google.android.youtube.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.youtube.sh"
-            su -c "cp mount_revanced_com.google.android.apps.youtube.music.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_com.google.android.apps.youtube.music.sh"
+            PKGNAME=$pkgname su -c 'echo """#!/system/bin/sh\nMAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin\nMIRROR=\"$MAGISKTMP/.magisk/mirror\"\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$PKGNAME".apk\"\nstock_path=\$( pm path $PKGNAME | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$MIRROR\$base_path \$stock_path""" > /data/adb/service.d/mount_revanced_$PKGNAME.sh'
         fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
@@ -449,9 +451,13 @@ app_dl()
     fi
 }
 
-patchinclusion()
+setargs()
 {
     includepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "on"))[].patchname' patches.json | sed "s/^/-i /g"))
+    if [ "$patchesrepo" = "inotia00" ] && [ "$appname" = "YouTube" ]
+    then
+        riplibs="--rip-lib x86_64 --rip-lib x86"
+    fi
 }
 
 versionselector()
@@ -491,7 +497,7 @@ fetchapk()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-            applink=$(cat link.txt) && rm link.txt
+            applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1 
             app_dl
         else
             if ! "${header[@]}" --begin 5 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
@@ -499,6 +505,7 @@ fetchapk()
                 internet
             else
                 appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
+                clear
                 return 0
             fi
         fi
@@ -514,8 +521,8 @@ fetchapk()
 patchapp()
 {
     echo "Patching $appname..."
-    patchinclusion
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk --custom-aapt2-binary ./aapt2_"$arch" --options options.toml --experimental --exclusive &&
+    setargs
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive &&
     sleep 3
 }
 

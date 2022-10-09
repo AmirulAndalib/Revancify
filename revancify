@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-
+termux-wake-lock
 checkdependencies()
 {
     if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ "$(find ~/../usr/lib/ -name "wheel" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "requests" | wc -l)" != "0" ] && [ "$(find ~/../usr/lib/ -name "bs4" | wc -l)" != "0" ] && [ -e ~/../usr/bin/revancify ]
@@ -35,7 +35,6 @@ checkrevancify()
         return 0
     else
         echo "Revancify is not installed"
-        exit
     fi
 }
 
@@ -54,6 +53,7 @@ then
     else
         installdependencies
         bash main.sh
+        cd ~
     fi
 else
     checkrevancify
@@ -62,8 +62,9 @@ else
         tput civis
         rm -rf ./*cache
         bash main.sh
+        cd ~
     else
         echo "Dependencies not installed. Run again with internet connection."
-        exit
     fi
 fi
+termux-wake-unlock
