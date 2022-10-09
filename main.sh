@@ -61,12 +61,7 @@ fetchresources()
     #get patches version
     int_latest="${revanced_latest[2]}"
 
-
-    patchesbranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.patches_branch' sources.json)
-
-    clibranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.cli_branch' sources.json)
-    
-    integrationsbranch=$(jq -r 'map(select(.source_status == "on"))[].source_info.integrations_branch' sources.json)
+    currentsource=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
     #check patch
     if ls ./revanced-patches-* > /dev/null 2>&1
     then
@@ -75,7 +70,7 @@ fetchresources()
         then
             echo "Latest Patches already exist."
             echo ""
-            wget -q -c https://github.com/"$patchesbranch"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            wget -q -c https://github.com/"$currentsource"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         else
             echo "Patches update available !!"
@@ -83,13 +78,13 @@ fetchresources()
             echo ""
             echo "Downloading latest Patches..."
             echo ""
-            wget -q -c https://github.com/"$patchesbranch"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            wget -q -c https://github.com/"$currentsource"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         fi
     else
         echo "Downloading latest patches file..."
         echo ""
-        wget -q -c https://github.com/"$patchesbranch"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c https://github.com/"$currentsource"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         echo ""
     fi
 
@@ -101,7 +96,7 @@ fetchresources()
         then
             echo "Latest CLI already exists."
             echo ""
-            wget -q -c https://github.com/"$clibranch"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            wget -q -c https://github.com/"$currentsource"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         else
             echo "CLI update available !!"
@@ -109,13 +104,13 @@ fetchresources()
             echo ""
             echo "Downloading latest CLI..."
             echo ""
-            wget -q -c https://github.com/"$clibranch"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            wget -q -c https://github.com/"$currentsource"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         fi
     else
         echo "Downloading latest CLI..."
         echo ""
-        wget -q -c https://github.com/"$clibranch"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c https://github.com/"$currentsource"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         echo ""
     fi
 
@@ -127,7 +122,7 @@ fetchresources()
         then
             echo "Latest Integrations already exist."
             echo ""
-            wget -q -c https://github.com/"$integrationsbranch"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            wget -q -c https://github.com/"$currentsource"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
         else
             echo "Integrations update available !!"
@@ -135,14 +130,14 @@ fetchresources()
             echo ""
             echo "Downloading latest Integrations apk..."
             echo ""
-            wget -q -c https://github.com/"$integrationsbranch"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+            wget -q -c https://github.com/"$currentsource"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
             echo ""
         fi
     else
         echo "Downloading latest Integrations apk..."
         echo ""
-        wget -q -c https://github.com/"$integrationsbranch"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c https://github.com/"$currentsource"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         echo ""
         sleep 0.5s
         tput rc; tput ed
