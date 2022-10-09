@@ -421,7 +421,13 @@ setargs()
     includepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "on"))[].patchname' patches.json | sed "s/^/-i /g"))
     if [ "$source" = "inotia00" ] && [ "$appname" = "YouTube" ]
     then
-        riplibs="--rip-lib x86_64 --rip-lib x86"
+        if [ "$arch" = "arm64" ]
+        then
+            riplibs="--rip-lib armeabi-v7a --rip-lib x86_64 --rip-lib x86"
+        elif [ "$arch" = "armeabi" ]
+        then
+            riplibs="--rip-lib arm64-v8a --rip-lib x86_64 --rip-lib x86"
+        fi
     fi
     if [ "$optionscompatible" = true ]
     then
