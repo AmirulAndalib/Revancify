@@ -16,6 +16,11 @@ setup()
     source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
     availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
     optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].optionsCompatible' sources.json)
+    if ! ls ./patches* > /dev/null 2>&1
+    then
+        internet
+        python3 ./python-utils/fetch-patches.py
+    fi
 }
 
 internet()
@@ -52,6 +57,7 @@ fetchresources()
     internet
     clear
     intro
+    python3 ./python-utils/fetch-patches.py
     
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
     
@@ -159,7 +165,7 @@ changesource()
     if [ "$source" != "$selectedsource" ]
     then
         source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
-         availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
+        availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
         fetchresources
     fi
@@ -197,11 +203,6 @@ selectapp()
 selectpatches()
 {  
     patchselectionheight=$(($(tput lines) - 6))
-    if ! ls ./patches* > /dev/null 2>&1
-    then
-        internet
-        python3 ./python-utils/fetch-patches.py
-    fi
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
     choices=($("${header[@]}" --begin 5 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))

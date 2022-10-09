@@ -10,26 +10,31 @@ versionlist=[]
 def bsurl(url):
     return fetch(url).bsurl()
 
-with open('sources.json', 'r') as sourcesfile:
-    sourcesjson = json.load(sourcesfile)
 
-
-for source in sourcesjson:
-    if source['sourceStatus'] == "on":
-        patchesrepo = source['sourceMaintainer']
-        patchesbranch = source['jsonBranch']
-
-patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
 
 if sys.argv[1] == "YouTube":
+    with open('sources.json', 'r') as sourcesfile:
+        sourcesjson = json.load(sourcesfile)
+    for source in sourcesjson:
+        if source['sourceStatus'] == "on":
+            patchesrepo = source['sourceMaintainer']
+            patchesbranch = source['jsonBranch']
+    patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
     for json in (requests.get(patchesurl)).json():
         if json['name'] == 'general-ads':
-            for appver in json['compatiblePackages'][0]['versions'][-1:-11:-1]:
+            for appver in (((json['compatiblePackages'])[0])['versions'])[-1:-11:-1]:
                 print(appver)
 elif sys.argv[1] == "YTMusic":
+    with open('sources.json', 'r') as sourcesfile:
+        sourcesjson = json.load(sourcesfile)
+    for source in sourcesjson:
+        if source['sourceStatus'] == "on":
+            patchesrepo = source['sourceMaintainer']
+            patchesbranch = source['jsonBranch']
+    patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
     for json in (requests.get(patchesurl)).json():
         if json['name'] == 'compact-header':
-            for appver in json['compatiblePackages'][0]['versions'][-1:-11:-1]:
+            for appver in (((json['compatiblePackages'])[0])['versions'])[-1:-11:-1]:
                 print(appver)
 elif sys.argv[1] == "Twitter":
     for a in bsurl("https://www.apkmirror.com/uploads/?devcategory=twitter-inc").find_all(text = re.compile(".*variants")):
