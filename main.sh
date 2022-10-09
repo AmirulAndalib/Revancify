@@ -478,7 +478,6 @@ fetchapk()
                 return 0
             fi
         fi
-
     else
         internet
         python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
