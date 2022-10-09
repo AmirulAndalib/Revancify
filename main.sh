@@ -9,12 +9,13 @@ trap terminatescript SIGINT
 
 setup()
 {
-    if ! jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json > /dev/null
+    if ! jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json > /dev/null
     then
-        echo '[{"source_maintainer" : "revanced", "source_status" : "on", "json_branch" : "main", "available_apps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"]},{"source_maintainer" : "inotia00", "source_status" : "off", "json_branch" : "revanced_extended", "available_apps": ["Youtube", "YTMusic"]}]' | jq '.' > sources.json
+        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "jsonBranch" : "main", "availableApps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "jsonBranch" : "revanced_extended", "availableApps": ["Youtube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
     fi
-    source=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
-    availableapps=($(jq -r 'map(select(.source_status == "on"))[].available_apps[]' sources.json))
+    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+    availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
+    optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
 }
 
 internet()
@@ -42,7 +43,7 @@ intro()
 }
 
 leavecols=$(($(($(tput cols) - 38)) / 2))
-fullpagewidth=$(tput cols )
+fullpagewidth=$(tput cols)
 fullpageheight=$(($(tput lines) - 5 ))
 header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
@@ -150,15 +151,15 @@ fetchresources()
 changesource()
 {
     internet
-    source=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
-    allsources=($(jq -r '.[] | "\(.source_maintainer) \(.source_status)"' sources.json))
+    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+    allsources=($(jq -r '.[] | "\(.sourceMaintainer) \(.sourceStatus)"' sources.json))
     selectedsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
     tmp=$(mktemp)
-    jq -r 'map(select(.).source_status = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.source_maintainer == $selectedsource).source_status = "on")' > "$tmp" && mv "$tmp" sources.json
+    jq -r 'map(select(.).sourceStatus = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.sourceMaintainer == $selectedsource).sourceStatus = "on")' > "$tmp" && mv "$tmp" sources.json
     if [ "$source" != "$selectedsource" ]
     then
-        source=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
-         availableapps=($(jq -r 'map(select(.source_status == "on"))[].available_apps[]' sources.json))
+        source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+         availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
         fetchresources
     fi
@@ -571,15 +572,11 @@ buildapp()
 
 mainmenu()
 {
-    opttionscompatible
-    if [ "$source" = "revanced" ]
+    if [ "$optionscompatible" = true ]
     then
-        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources" 5 "Edit Patch Options")
-    elif [ "$source" = "inotia00" ]
-    then
-        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources")
+        optionseditor=(5 "Edit Patch Options")
     fi
-    mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
