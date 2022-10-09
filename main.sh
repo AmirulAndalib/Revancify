@@ -424,7 +424,9 @@ setargs()
     fi
     if [ "$optionscompatible" = true ]
     then
-        optionarg="--options options.toml"
+        optionsarg="--options options.toml"
+    else
+        unset optionsarg
     fi
 }
 
@@ -465,7 +467,8 @@ fetchapk()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-            applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1 
+            clear
+            applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1
             app_dl
         else
             if ! "${header[@]}" --begin 5 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
@@ -491,7 +494,7 @@ patchapp()
     intro
     echo "Patching $appname..."
     setargs
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionarg --experimental --exclusive &&
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive &&
     sleep 3
 }
 
@@ -576,6 +579,8 @@ mainmenu()
     if [ "$optionscompatible" = true ]
     then
         optionseditor=(5 "Edit Patch Options")
+    else
+        unset optionseditor
     fi
     mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
     exitstatus=$?
