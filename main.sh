@@ -607,5 +607,5 @@ mainmenu()
     fi
 }
 
-
+setup
 mainmenu
