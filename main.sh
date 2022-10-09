@@ -572,6 +572,7 @@ buildapp()
 
 mainmenu()
 {
+    setup
     if [ "$optionscompatible" = true ]
     then
         optionseditor=(5 "Edit Patch Options")
@@ -603,5 +604,5 @@ mainmenu()
     fi
 }
 
-setup
+
 mainmenu
