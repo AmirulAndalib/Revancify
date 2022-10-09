@@ -155,7 +155,7 @@ changesource()
 {
     internet
     allsources=($(jq -r '.[] | "\(.source_maintainer) \(.source_status)"' sources.json))
-    selectedsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
+    selectedsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
     tmp=$(mktemp)
     jq -r 'map(select(.).source_status = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.source_maintainer == $selectedsource).source_status = "on")' > "$tmp" && mv "$tmp" sources.json
     mainmenu
