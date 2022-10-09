@@ -11,7 +11,7 @@ setup()
 {
     if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
     then
-        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "jsonBranch" : "main", "availableApps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "jsonBranch" : "revanced_extended", "availableApps": ["Youtube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
+        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "jsonBranch" : "main", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "jsonBranch" : "revanced_extended", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
     fi
     source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
     availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
@@ -174,23 +174,18 @@ selectapp()
     then
         if [ "$appname" = "YouTube" ]
         then
-            appname=YouTube
             pkgname=com.google.android.youtube
         elif [ "$appname" = "YTMusic" ]
         then
-            appname=YTMusic
             pkgname=com.google.android.apps.youtube.music
         elif [ "$appname" = "Twitter" ]
         then
-            appname=Twitter
             pkgname=com.twitter.android
         elif [ "$appname" = "Reddit" ]
         then
-            appname=Reddit
             pkgname=com.reddit.frontpage
         elif [ "$appname" = "TikTok" ]
         then
-            appname=TikTok
             pkgname=com.ss.android.ugc.trill
         fi
     elif [ $exitstatus -ne 0 ]
