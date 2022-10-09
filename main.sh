@@ -11,7 +11,7 @@ setup()
 {
     if ! ls ./sources* > /dev/null 2>&1
     then
-        echo '[{"source_maintainer" : "revanced", "source_status" : "on", "source_info" : {"patches_branch" : "main", "cli_branch" : "main", "integrations_branch" : "main", "available_apps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"]}},{"source_maintainer" : "inotia00", "source_status" : "off", "source_info" : {"patches_branch" : "revanced-extended", "cli_branch" : "riplib", "integrations_branch" : "revanced-extended",  "available_apps": ["Youtube", "YTMusic"]}}]' | jq '.' > sources.json
+        echo '[{"source_maintainer" : "revanced", "source_status" : "on", "json_branch" : "main" ,"available_apps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"]}},{"source_maintainer" : "inotia00", "source_status" : "off", "json_branch" : "revanced_extended", "available_apps": ["Youtube", "YTMusic"]}}]' | jq '.' > sources.json
     fi
 }
 
@@ -164,7 +164,7 @@ changesource()
 
 selectapp()
 {
-    availableapps=($(jq -r 'map(select(.source_status == "on"))[].source_info.available_apps[]' sources.json))
+    availableapps=($(jq -r 'map(select(.source_status == "on"))[].available_apps[]' sources.json))
     selectapp=$("${header[@]}" --begin 5 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${availableapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]

@@ -8,14 +8,12 @@ with open('sources.json', 'r') as sourcesfile:
 
 for source in sourcesjson:
     if source['source_status'] == "on":
-        patchesrepo = source['source_maintainer']
-        clirepo = source['source_maintainer']
-        integrationsrepo = source['source_maintainer']
+        sourcemaintainer = source['source_maintainer']
 
 
-patchesurl = "".join(["https://api.github.com/repos/", patchesrepo, "/revanced-patches/releases/latest"])
-cliurl = "".join(["https://api.github.com/repos/", clirepo, "/revanced-cli/releases/latest"])
-integrationsurl = "".join(["https://api.github.com/repos/", integrationsrepo, "/revanced-integrations/releases/latest"])
+patchesurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-patches/releases/latest"])
+cliurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-cli/releases/latest"])
+integrationsurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-integrations/releases/latest"])
 
 
 requests_session = requests.Session()

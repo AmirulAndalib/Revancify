@@ -17,7 +17,7 @@ with open('sources.json', 'r') as sourcesfile:
 for source in sourcesjson:
     if source['source_status'] == "on":
         patchesrepo = source['source_maintainer']
-        patchesbranch = source['source_info']['patches_branch']
+        patchesbranch = source['json_branch']
 
 patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
 
