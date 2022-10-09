@@ -11,7 +11,7 @@ setup()
 {
     if ! ls ./sources* > /dev/null 2>&1
     then
-        echo '[{"source_maintainer" : "revanced", "source_status" : "on", "source_info" : {"patches_branch" : "main", "cli_branch" : "main", "integrations_branch" : "main", "available_apps": ["Youtube", "YT Music", "Twitter", "Reddit", "TikTok"]}},{"source_maintainer" : "inotia00", "source_status" : "off", "source_info" : {"patches_branch" : "revanced_extended", "cli_branch" : "riplib", "integrations_branch" : "revanced_extended",  "available_apps": ["Youtube", "YT Music"]}}]' | jq '.' > sources.json
+        echo '[{"source_maintainer" : "revanced", "source_status" : "on", "source_info" : {"patches_branch" : "main", "cli_branch" : "main", "integrations_branch" : "main", "available_apps": ["Youtube", "YTMusic", "Twitter", "Reddit", "TikTok"]}},{"source_maintainer" : "inotia00", "source_status" : "off", "source_info" : {"patches_branch" : "revanced_extended", "cli_branch" : "riplib", "integrations_branch" : "revanced_extended",  "available_apps": ["Youtube", "YTMusic"]}}]' | jq '.' > sources.json
     fi
 }
 
@@ -157,34 +157,35 @@ changesource()
     currentsource=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
     allsources=($(jq -r '.[] | "\(.source_maintainer) \(.source_status)"' sources.json))
     selectedsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
-    jq -r 'map(select(.).source_status = "off")' sources.json | jq -r  --arg selectedsource "$selectedsource" 'map(select(.source_maintainer == $selectedsource).source_status = "on")' > "$tmp" && mv "$tmp" sources.json
+    tmp=$(mktemp)
+    jq -r 'map(select(.).source_status = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.source_maintainer == $selectedsource).source_status = "on")' > "$tmp" && mv "$tmp" sources.json
     mainmenu
 }
 
 selectapp()
 {
     availableapps=($(jq -r 'map(select(.source_status == "on"))[].source_info.available_apps[]' sources.json))
-    selectapp=$("${header[@]}" --begin 5 0 --title ' App Selection Menu ' --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${availableapps[@]}" 2>&1> /dev/tty)
+    selectapp=$("${header[@]}" --begin 5 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${availableapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
-        if [ "$selectapp" -eq "1" ]
+        if [ "$selectapp" = "YouTube" ]
         then
             appname=YouTube
             pkgname=com.google.android.youtube
-        elif [ "$selectapp" -eq "2" ]
+        elif [ "$selectapp" = "YTMusic" ]
         then
             appname=YTMusic
             pkgname=com.google.android.apps.youtube.music
-        elif [ "$selectapp" -eq "3" ]
+        elif [ "$selectapp" = "Twitter" ]
         then
             appname=Twitter
             pkgname=com.twitter.android
-        elif [ "$selectapp" -eq "4" ]
+        elif [ "$selectapp" = "Reddit" ]
         then
             appname=Reddit
             pkgname=com.reddit.frontpage
-        elif [ "$selectapp" -eq "5" ]
+        elif [ "$selectapp" = "TikTok" ]
         then
             appname=TikTok
             pkgname=com.ss.android.ugc.trill
