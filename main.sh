@@ -568,11 +568,7 @@ buildapp()
 
 mainmenu()
 {
-    if ! ls ./sources* > /dev/null 2>&1
-    then
-        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
-    fi
-    currentsource=$(jq -r 'map(select(.source_status == "on")).source_maintainer' sources.json)
+    currentsource=$(jq -r 'map(select(.source_status == "on"))[].source_maintainer' sources.json)
     if [ "$currentsource" = "revanced" ]
     then
         menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources" 5 "Edit Patch Options")
