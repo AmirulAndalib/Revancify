@@ -427,6 +427,10 @@ setargs()
     then
         riplibs="--rip-lib x86_64 --rip-lib x86"
     fi
+    if [ "$optionscompatible" = true ]
+    then
+        optionarg="--options options.toml"
+    fi
 }
 
 versionselector()
@@ -488,9 +492,11 @@ fetchapk()
 
 patchapp()
 {
+    clear
+    intro
     echo "Patching $appname..."
     setargs
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive &&
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionarg --experimental --exclusive &&
     sleep 3
 }
 
