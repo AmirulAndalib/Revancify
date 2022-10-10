@@ -387,6 +387,7 @@ setargs()
 
 versionselector()
 {
+    checkresources
     if ls ./"$appname"* > /dev/null 2>&1
     then
         if ping -c 1 google.com > /dev/null 2>&1
