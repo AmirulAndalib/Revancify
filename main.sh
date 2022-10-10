@@ -70,7 +70,7 @@ checkresources()
     then
         patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3)
         cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3)
-        integrations_available=$(basename revanced-integrations* .jar | cut -d '-' -f 3)
+        integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3)
     else
         patches_available="Not found"
         cli_available="Not found"
@@ -89,7 +89,7 @@ getresources()
 {  
     echo "Updating resources..."
     echo ""
-    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O remotepatches.json --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
