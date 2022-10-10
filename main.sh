@@ -255,7 +255,7 @@ dlmicrog()
 
 checkresources()
 {
-    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
+    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1 && ls ./remotepatches* > /dev/null 2>&1
     then
         return 0
     else
