@@ -11,8 +11,14 @@ setup()
 {
     if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
     then
-        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "jsonBranch" : "main", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "jsonBranch" : "revanced-extended", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
+        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
+    elif [ $(jq '.[0] | has("jsonBranch")' sources.json) = true ]
+    then
+        tmp=$(mktemp)
+        jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
     fi
+    tmp=$(mktemp)
+    jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
     source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
     availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
     optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].optionsCompatible' sources.json)
