@@ -53,7 +53,7 @@ fullpagewidth=$(tput cols)
 fullpageheight=$(($(tput lines) - 5 ))
 header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
-checkresources()
+resourcemenu()
 {
     internet
 
@@ -149,7 +149,7 @@ selectpatches()
     if ! ls ./revanced-patches* > /dev/null 2>&1
     then
         "${header[@]}" --msgbox "No Patches found !!\nPlease update resources to edit patches" 10 35
-        checkresources
+        resourcemenu
         return 0
     fi
     patchselectionheight=$(($(tput lines) - 6))
@@ -242,7 +242,7 @@ dlmicrog()
     fi
 }
 
-checkresource()
+checkresources()
 {
     if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
     then
@@ -477,7 +477,7 @@ checkmicrogpatch()
 buildapp()
 {
     selectapp
-    checkresource
+    checkresources
     if ! ls ./patches* > /dev/null 2>&1
     then
         internet
@@ -540,7 +540,7 @@ mainmenu()
             changesource
         elif [ "$mainmenu" -eq "4" ]
         then
-            checkresources
+            resourcemenu
         elif [ "$mainmenu" -eq 5 ]
         then
             patchoptions
