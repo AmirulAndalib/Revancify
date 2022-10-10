@@ -301,7 +301,6 @@ sucheck()
         su -c "mkdir -p /data/adb/revanced"
         echo -e "#!/system/bin/sh\nMAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin\nMIRROR=\"\$MAGISKTMP/.magisk/mirror\"\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$PKGNAME".apk\"\nstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$MIRROR\$base_path \$stock_path" > ./mount_revanced_$pkgname.sh
         su -c 'mv mount_revanced* /data/adb/service.d/'
-        fi
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
             internet
