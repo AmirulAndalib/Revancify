@@ -255,7 +255,7 @@ dlmicrog()
 
 checkresources()
 {
-    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
+    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1 && ls ./remotepatches* > /dev/null 2>&1
     then
         return 0
     else
@@ -303,19 +303,8 @@ sucheck()
         su -c 'mv mount_revanced* /data/adb/service.d/ && chmod +x /data/adb/service.d/mount*'
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            internet
-            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-            appver=$("${header[@]}" --begin 5 0 --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-            exitstatus=$?
-            if [ $exitstatus -ne 0 ]
-            then
-                mainmenu
-                return 0
-            fi
-            fetchapk
-            checkpatched
-            patchapp
-            moveapk
+            versionselector
+            return 0
         fi
     else
         variant=nonroot
@@ -387,30 +376,13 @@ setargs()
 
 versionselector()
 {
-    if ls ./"$appname"* > /dev/null 2>&1
+    checkresources
+    readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+    appver=$("${header[@]}" --begin 5 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    exitstatus=$?
+    if [ $exitstatus -ne 0 ]
     then
-        if ping -c 1 google.com > /dev/null 2>&1
-        then
-            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-            appver=$("${header[@]}" --begin 5 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-            exitstatus=$?
-            if [ $exitstatus -ne 0 ]
-            then
-                mainmenu
-            fi
-        else
-            appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
-            return 0
-        fi
-    else
-        internet
-        readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-        appver=$("${header[@]}" --begin 5 0 --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-        exitstatus=$?
-        if [ $exitstatus -ne 0 ]
-        then
-            mainmenu
-        fi
+        mainmenu
     fi
 
 }
@@ -446,6 +418,7 @@ patchapp()
 {
     setargs
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | "${header[@]}" --begin 5 0 --title " Patching $appname " --progressbox $fullpageheight $fullpagewidth &&
+    tput civis
     sleep 3
 }
 
