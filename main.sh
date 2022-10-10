@@ -149,7 +149,13 @@ selectapp()
 }
 
 selectpatches()
-{  
+{
+    if ! ls ./revanced-patches* > /dev/null 2>&1
+    then
+        "${header[@]}" --msgbox "No Patches found !!\n Please update resources to edit patches" 10 35
+        checkresources
+        return 0
+    fi
     patchselectionheight=$(($(tput lines) - 6))
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
