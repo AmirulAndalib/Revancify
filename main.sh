@@ -86,7 +86,7 @@ resourcemenu()
 }
 
 getresources() 
-{  
+{
     clear
     intro
     echo "Fetching resources..."
@@ -117,6 +117,8 @@ changesource()
         availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
         rm remotepatches.json > /dev/null 2>&1
+        mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
+        patches_latest="${revanced_latest[0]}" && cli_latest="${revanced_latest[1]}" && integrations_latest="${revanced_latest[2]}"
         getresources
     fi
     mainmenu
