@@ -83,7 +83,7 @@ getresources()
 {  
     clear
     intro
-    echo "Updating resources..."
+    echo "Fetching resources..."
     echo ""
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
@@ -248,7 +248,7 @@ checkresources()
     then
         return 0
     else
-        getresources
+        resourcemenu
     fi
 }
 
