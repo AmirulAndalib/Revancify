@@ -388,30 +388,12 @@ setargs()
 versionselector()
 {
     checkresources
-    if ls ./"$appname"* > /dev/null 2>&1
+    readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
+    appver=$("${header[@]}" --begin 5 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    exitstatus=$?
+    if [ $exitstatus -ne 0 ]
     then
-        if ping -c 1 google.com > /dev/null 2>&1
-        then
-            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-            appver=$("${header[@]}" --begin 5 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-            exitstatus=$?
-            if [ $exitstatus -ne 0 ]
-            then
-                mainmenu
-            fi
-        else
-            appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
-            return 0
-        fi
-    else
-        internet
-        readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-        appver=$("${header[@]}" --begin 5 0 --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-        exitstatus=$?
-        if [ $exitstatus -ne 0 ]
-        then
-            mainmenu
-        fi
+        mainmenu
     fi
 
 }
