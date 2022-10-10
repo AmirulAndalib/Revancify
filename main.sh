@@ -76,6 +76,9 @@ resourcemenu()
     ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not found"
     if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  $patches_available\nCLI           v$cli_latest  $cli_available\nIntegrations  v$integrations_latest  $integrations_available\n\nDo you want to fetch latest resources?" $fullpageheight $fullpagewidth
     then
+        [ "$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
+        [ "$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
+        [ "$integrations_latest" != "$integrations_available" ] && rm revanced-integrations* > /dev/null 2>&1
         getresources
         mainmenu
         return 0
