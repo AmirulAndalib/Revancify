@@ -57,20 +57,15 @@ fetchresources()
     internet
     clear
     intro
-    python3 ./python-utils/fetch-patches.py
     
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
     
-    #get patches version
     patches_latest="${revanced_latest[0]}"
 
-    #get cli version
     cli_latest="${revanced_latest[1]}"
 
-    #get patches version
     int_latest="${revanced_latest[2]}"
 
-    #check patch
     if ls ./revanced-patches-* > /dev/null 2>&1
     then
         patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) #get version
@@ -99,7 +94,9 @@ fetchresources()
         echo ""
     fi
 
-    #check cli
+    python3 ./python-utils/fetch-patches.py
+
+
     if ls -l ./revanced-cli-* > /dev/null 2>&1
     then
         cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) #get version
