@@ -63,14 +63,14 @@ checkresources()
 
     cli_latest="${revanced_latest[1]}"
 
-    int_latest="${revanced_latest[2]}"
+    integrations_latest="${revanced_latest[2]}"
 
 
     if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
     then
-        patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 2)
-        cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 2)
-        integrations_available=$(basename revanced-integrations* .jar | cut -d '-' -f 2)
+        patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3)
+        cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3)
+        integrations_available=$(basename revanced-integrations* .jar | cut -d '-' -f 3)
     else
         patches_available="Not found"
         cli_available="Not found"
@@ -95,7 +95,7 @@ getresources()
     echo ""
     wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
-    wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     python3 ./python-utils/fetch-patches.py
     echo ""
     mainmenu
