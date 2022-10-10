@@ -27,7 +27,7 @@ with open("remotepatches.json", "r") as remotepatches:
     remotejson = json.load(remotepatches)
 
 remotepatches = [key['name'] for key in remotejson]
-localpatches = [key['patchname'] for key in remotejson]
+localpatches = [key['patchname'] for key in localjson]
 obsoletepatches = []
 
 
