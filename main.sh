@@ -36,6 +36,7 @@ internet()
 
 intro()
 {
+    clear
     tput civis
     tput cs 4 $(tput lines)
     leave1=$(($(($(tput cols) - 34)) / 2))
@@ -52,12 +53,10 @@ fullpagewidth=$(tput cols)
 fullpageheight=$(($(tput lines) - 5 ))
 header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
-fetchresources()
+checkresources()
 {
     internet
-    clear
-    intro
-    
+
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
     
     patches_latest="${revanced_latest[0]}"
@@ -66,14 +65,39 @@ fetchresources()
 
     int_latest="${revanced_latest[2]}"
 
-    echo "Updating resources..."
 
+    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
+    then
+        patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 2)
+        cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 2)
+        integrations_available=$(basename revanced-integrations* .jar | cut -d '-' -f 2)
+    else
+        patches_available="Not found"
+        cli_available="Not found"
+        integrations_available="Not found"
+    fi
+    if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Update" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  v$patches_available\nCLI           v$cli_latest  v$cli_available\nIntegrations  v$integrations_latest  v$integrations_available\n\nDo you want to Update Resources?" $fullpageheight $fullpagewidth
+    then
+        get resources
+    else
+        mainmenu
+        return 0
+    fi
+}
+
+getresources() 
+{  
+    echo "Updating resources..."
+    echo ""
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    echo ""
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O remotepatches.json --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    echo ""
     wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    echo ""
     wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     python3 ./python-utils/fetch-patches.py
-
+    echo ""
     mainmenu
 }
 
@@ -211,7 +235,6 @@ dlmicrog()
 {
     if "${header[@]}" --begin 5 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
         then
-            clear
             intro
             wget -q -c "https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk" -O "Vanced_MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
@@ -297,7 +320,6 @@ sucheck()
 # App Downloader
 app_dl()
 {
-    clear
     intro
     internet
     if ls ./"$appname"-* > /dev/null 2>&1
@@ -394,7 +416,6 @@ fetchapk()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-            clear
             applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1
             app_dl
         else
@@ -506,7 +527,7 @@ mainmenu()
     else
         unset optionseditor
     fi
-    mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
@@ -522,7 +543,7 @@ mainmenu()
             changesource
         elif [ "$mainmenu" -eq "4" ]
         then
-            fetchresources
+            checkresources
         elif [ "$mainmenu" -eq 5 ]
         then
             patchoptions
