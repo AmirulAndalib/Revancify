@@ -6,14 +6,14 @@ import json
 with open('sources.json', 'r') as sourcesfile:
     sourcesjson = json.load(sourcesfile)
 
-patchesrepo = sourcesjson[0]['patches']['repo']
-clirepo = sourcesjson[1]['cli']['repo']
-integrationsrepo = sourcesjson[2]['integrations']['repo']
+for source in sourcesjson:
+    if source['sourceStatus'] == "on":
+        sourcemaintainer = source['sourceMaintainer']
 
 
-patchesurl = "".join(["https://api.github.com/repos/", patchesrepo, "/revanced-patches/releases/latest"])
-cliurl = "".join(["https://api.github.com/repos/", clirepo, "/revanced-cli/releases/latest"])
-integrationsurl = "".join(["https://api.github.com/repos/", integrationsrepo, "/revanced-integrations/releases/latest"])
+patchesurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-patches/releases/latest"])
+cliurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-cli/releases/latest"])
+integrationsurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-integrations/releases/latest"])
 
 
 requests_session = requests.Session()

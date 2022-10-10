@@ -7,6 +7,28 @@ trap terminatescript SIGINT
 
 # For update change this sentence here ...
 
+setup()
+{
+    if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
+    then
+        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
+    elif [ $(jq '.[0] | has("jsonBranch")' sources.json) = true ]
+    then
+        tmp=$(mktemp)
+        jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
+    fi
+    tmp=$(mktemp)
+    jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
+    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+    availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
+    optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].optionsCompatible' sources.json)
+    if ! ls ./patches* > /dev/null 2>&1
+    then
+        internet
+        python3 ./python-utils/fetch-patches.py
+    fi
+}
+
 internet()
 {
     if ping -c 1 google.com > /dev/null 2>&1
@@ -20,6 +42,7 @@ internet()
 
 intro()
 {
+    clear
     tput civis
     tput cs 4 $(tput lines)
     leave1=$(($(($(tput cols) - 34)) / 2))
@@ -32,196 +55,98 @@ intro()
 }
 
 leavecols=$(($(($(tput cols) - 38)) / 2))
-fullpagewidth=$(tput cols )
+fullpagewidth=$(tput cols)
 fullpageheight=$(($(tput lines) - 5 ))
 header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
-fetchresources()
+resourcemenu()
 {
     internet
-    clear
-    intro
-    if ! ls ./sources* > /dev/null 2>&1
-    then
-        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
-    fi
-    
+
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
     
-    #get patches version
     patches_latest="${revanced_latest[0]}"
 
-    #get cli version
     cli_latest="${revanced_latest[1]}"
 
-    #get patches version
-    int_latest="${revanced_latest[2]}"
+    integrations_latest="${revanced_latest[2]}"
 
-
-    patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
-
-    clirepo=$(jq -r '.[1].cli.repo' sources.json)
-    
-    integrationsrepo=$(jq -r '.[2].integrations.repo' sources.json)
-    #check patch
-    if ls ./revanced-patches-* > /dev/null 2>&1
+    ls ./revanced-patches* > /dev/null 2>&1 && patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not found"
+    ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not found"
+    ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not found"
+    if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  $patches_available\nCLI           v$cli_latest  $cli_available\nIntegrations  v$integrations_latest  $integrations_available\n\nDo you want to fetch latest resources?" $fullpageheight $fullpagewidth
     then
-        patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) #get version
-        if [ "$patches_latest" = "$patches_available" ]
-        then
-            echo "Latest Patches already exist."
-            echo ""
-            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            echo ""
-        else
-            echo "Patches update available !!"
-            rm revanced-patches*
-            echo ""
-            echo "Downloading latest Patches..."
-            echo ""
-            wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            echo ""
-        fi
+        [ "v$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
+        [ "v$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
+        [ "v$integrations_latest" != "$integrations_available" ] && rm revanced-integrations* > /dev/null 2>&1
+        getresources
+        mainmenu
+        return 0
     else
-        echo "Downloading latest patches file..."
-        echo ""
-        wget -q -c https://github.com/"$patchesrepo"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-        echo ""
+        mainmenu
+        return 0
     fi
+}
 
-    #check cli
-    if ls -l ./revanced-cli-* > /dev/null 2>&1
-    then
-        cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) #get version
-        if [ "$cli_latest" = "$cli_available" ]
-        then
-            echo "Latest CLI already exists."
-            echo ""
-            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            echo ""
-        else
-            echo "CLI update available !!"
-            rm revanced-cli*
-            echo ""
-            echo "Downloading latest CLI..."
-            echo ""
-            wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            echo ""
-        fi
-    else
-        echo "Downloading latest CLI..."
-        echo ""
-        wget -q -c https://github.com/"$clirepo"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-        echo ""
-    fi
-
-    #check integrations
-    if ls ./revanced-integrations-* > /dev/null 2>&1
-    then
-        int_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) #get version
-        if [ "$int_latest" = "$int_available" ]
-        then
-            echo "Latest Integrations already exist."
-            echo ""
-            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            echo ""
-        else
-            echo "Integrations update available !!"
-            rm revanced-integrations*
-            echo ""
-            echo "Downloading latest Integrations apk..."
-            echo ""
-            wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            echo ""
-            echo ""
-        fi
-    else
-        echo "Downloading latest Integrations apk..."
-        echo ""
-        wget -q -c https://github.com/"$integrationsrepo"/revanced-integrations/releases/download/v"$int_latest"/app-release-unsigned.apk -O revanced-integrations-"$int_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-        echo ""
-        sleep 0.5s
-        tput rc; tput ed
-    fi
-    mainmenu
+getresources() 
+{
+    clear
+    intro
+    echo "Fetching resources..."
+    echo ""
+    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    echo ""
+    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O remotepatches.json --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    echo ""
+    wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-v"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    echo ""
+    wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-v"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    python3 ./python-utils/fetch-patches.py
+    echo ""
 }
 
 
 changesource()
 {
     internet
-    patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
-    if [ "$patchesrepo" = "revanced" ]
+    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+    allsources=($(jq -r '.[] | "\(.sourceMaintainer) \(.sourceStatus)"' sources.json))
+    selectedsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
+    tmp=$(mktemp)
+    jq -r 'map(select(.).sourceStatus = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.sourceMaintainer == $selectedsource).sourceStatus = "on")' > "$tmp" && mv "$tmp" sources.json
+    if [ "$source" != "$selectedsource" ]
     then
-        selectedsource=(1 "Official: Revanced" on 2 "Custom: Inotia00" off)
-    elif [ "$patchesrepo" = "inotia00" ]
-    then
-        selectedsource=(1 "Official: Revanced" off 2 "Custom: Inotia00" on)
-    fi
-    selectsource=$("${header[@]}" --begin 5 0 --title ' Source Selection Menu ' --keep-window --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${selectedsource[@]}" 2>&1> /dev/tty)
-    if [ "$selectsource" -eq "1" ]
-    then
-        if [ "$patchesrepo" = "revanced" ]
-        then
-            echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
-        else
-            echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
-            rm revanced-patches* > /dev/null 2>&1
-            rm revanced-integrations* > /dev/null 2>&1
-            rm revanced-cli* > /dev/null 2>&1
-            python3 ./python-utils/fetch-patches.py
-            fetchresources
-        fi
-    elif [ "$selectsource" -eq "2" ]
-    then
-        if [ "$patchesrepo" = "inotia00" ]
-        then
-            echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
-        else
-            echo '[{"patches" : {"repo" : "inotia00", "branch" : "revanced-extended"}}, {"cli" : {"repo" : "inotia00", "branch" : "riplib"}}, {"integrations" : {"repo" : "inotia00", "branch" : "revanced-extended"}}]' | jq '.' > sources.json
-            rm revanced-patches* > /dev/null 2>&1
-            rm revanced-integrations* > /dev/null 2>&1
-            rm revanced-cli* > /dev/null 2>&1
-            python3 ./python-utils/fetch-patches.py
-            fetchresources
-        fi
+        source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+        availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
+        rm revanced-* > /dev/null 2>&1
+        rm remotepatches.json > /dev/null 2>&1
+        mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
+        patches_latest="${revanced_latest[0]}" && cli_latest="${revanced_latest[1]}" && integrations_latest="${revanced_latest[2]}"
+        getresources
     fi
     mainmenu
 }
 
 selectapp()
 {
-    patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
-    if [ "$patchesrepo" = "revanced" ]
-    then
-        apps=(1 "YouTube" 2 "YT Music" 3 "Twitter" 4 "Reddit" 5 "TikTok")
-    elif [ "$patchesrepo" = "inotia00" ]
-    then
-        apps=(1 "YouTube" 2 "YT Music")
-    fi
-    selectapp=$("${header[@]}" --begin 5 0 --title ' App Selection Menu ' --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${apps[@]}" 2>&1> /dev/tty)
+    appname=$("${header[@]}" --begin 5 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${availableapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
-        if [ "$selectapp" -eq "1" ]
+        if [ "$appname" = "YouTube" ]
         then
-            appname=YouTube
             pkgname=com.google.android.youtube
-        elif [ "$selectapp" -eq "2" ]
+        elif [ "$appname" = "YTMusic" ]
         then
-            appname=YTMusic
             pkgname=com.google.android.apps.youtube.music
-        elif [ "$selectapp" -eq "3" ]
+        elif [ "$appname" = "Twitter" ]
         then
-            appname=Twitter
             pkgname=com.twitter.android
-        elif [ "$selectapp" -eq "4" ]
+        elif [ "$appname" = "Reddit" ]
         then
-            appname=Reddit
             pkgname=com.reddit.frontpage
-        elif [ "$selectapp" -eq "5" ]
+        elif [ "$appname" = "TikTok" ]
         then
-            appname=TikTok
             pkgname=com.ss.android.ugc.trill
         fi
     elif [ $exitstatus -ne 0 ]
@@ -231,13 +156,14 @@ selectapp()
 }
 
 selectpatches()
-{  
-    patchselectionheight=$(($(tput lines) - 6))
-    if ! ls ./patches* > /dev/null 2>&1
+{
+    if ! ls ./revanced-patches* > /dev/null 2>&1
     then
-        internet
-        python3 ./python-utils/fetch-patches.py
+        "${header[@]}" --msgbox "No Patches found !!\nPlease update resources to edit patches" 10 35
+        resourcemenu
+        return 0
     fi
+    patchselectionheight=$(($(tput lines) - 6))
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
     choices=($("${header[@]}" --begin 5 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
@@ -268,12 +194,7 @@ patchsaver()
 
 patchoptions()
 {
-    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
-    then
-        :
-    else
-        fetchresources
-    fi
+    checkresources
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
@@ -284,10 +205,7 @@ patchoptions()
 
 mountapk()
 {   
-    clear
-    intro
-    echo "Unmounting and Mouting $appname..."
-    echo "This may take a while..."
+    "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
     PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     pm install ./"$APPNAME"-"$APPVER".apk &&\
     cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete &&\
@@ -298,7 +216,7 @@ mountapk()
     chown system:system "$revancedapp" &&\
     chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
     mount -o bind "$revancedapp" "$stockapp" &&\
-    am force-stop $PKGNAME'
+    am force-stop $PKGNAME' > /dev/null 2>&1
     sleep 1
     if [ "$pkgname" = "com.google.android.youtube" ]
     then
@@ -307,7 +225,6 @@ mountapk()
     then
         su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
     fi
-    termux-wake-unlock
     su -c 'pidof com.termux | xargs kill -9'
 }
 
@@ -326,7 +243,6 @@ dlmicrog()
 {
     if "${header[@]}" --begin 5 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
         then
-            clear
             intro
             wget -q -c "https://github.com/TeamVanced/VancedMicroG/releases/download/v0.2.24.220220-220220001/microg.apk" -O "Vanced_MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             echo ""
@@ -337,13 +253,13 @@ dlmicrog()
     fi
 }
 
-checkresource()
+checkresources()
 {
     if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
     then
         return 0
     else
-        fetchresources
+        resourcemenu
     fi
 }
 
@@ -383,10 +299,8 @@ sucheck()
     then
         variant=root
         su -c "mkdir -p /data/adb/revanced"
-        if ! su -c "ls /data/adb/service.d/mount_revanced*" > /dev/null 2>&1
-        then
-            PKGNAME=$pkgname su -c 'echo """#!/system/bin/sh\nMAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin\nMIRROR=\"$MAGISKTMP/.magisk/mirror\"\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$PKGNAME".apk\"\nstock_path=\$( pm path $PKGNAME | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$MIRROR\$base_path \$stock_path""" > /data/adb/service.d/mount_revanced_$PKGNAME.sh'
-        fi
+        echo -e "#!/system/bin/sh\nMAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin\nMIRROR=\"\$MAGISKTMP/.magisk/mirror\"\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$pkgname".apk\"\nstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$MIRROR\$base_path \$stock_path" > ./mount_revanced_$pkgname.sh
+        su -c 'mv mount_revanced* /data/adb/service.d/ && chmod +x /data/adb/service.d/mount*'
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
             internet
@@ -412,7 +326,6 @@ sucheck()
 # App Downloader
 app_dl()
 {
-    clear
     intro
     internet
     if ls ./"$appname"-* > /dev/null 2>&1
@@ -454,9 +367,21 @@ app_dl()
 setargs()
 {
     includepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "on"))[].patchname' patches.json | sed "s/^/-i /g"))
-    if [ "$patchesrepo" = "inotia00" ] && [ "$appname" = "YouTube" ]
+    if [ "$source" = "inotia00" ] && [ "$appname" = "YouTube" ]
     then
-        riplibs="--rip-lib x86_64 --rip-lib x86"
+        if [ "$arch" = "arm64" ]
+        then
+            riplibs="--rip-lib armeabi-v7a --rip-lib x86_64 --rip-lib x86"
+        elif [ "$arch" = "armeabi" ]
+        then
+            riplibs="--rip-lib arm64-v8a --rip-lib x86_64 --rip-lib x86"
+        fi
+    fi
+    if [ "$optionscompatible" = true ]
+    then
+        optionsarg="--options options.toml"
+    else
+        unset optionsarg
     fi
 }
 
@@ -497,7 +422,7 @@ fetchapk()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-            applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1 
+            applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1
             app_dl
         else
             if ! "${header[@]}" --begin 5 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
@@ -509,7 +434,6 @@ fetchapk()
                 return 0
             fi
         fi
-
     else
         internet
         python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
@@ -520,9 +444,8 @@ fetchapk()
 
 patchapp()
 {
-    echo "Patching $appname..."
     setargs
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" --options options.toml --experimental --exclusive &&
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | "${header[@]}" --begin 5 0 --title " Patching $appname " --progressbox $fullpageheight $fullpagewidth &&
     sleep 3
 }
 
@@ -563,7 +486,7 @@ checkmicrogpatch()
 buildapp()
 {
     selectapp
-    checkresource
+    checkresources
     if ! ls ./patches* > /dev/null 2>&1
     then
         internet
@@ -603,19 +526,14 @@ buildapp()
 
 mainmenu()
 {
-    if ! ls ./sources* > /dev/null 2>&1
+    setup
+    if [ "$optionscompatible" = true ]
     then
-        echo '[{"patches" : {"repo" : "revanced", "branch" : "main"}}, {"cli" : {"repo" : "revanced", "branch" : "main"}}, {"integrations" : {"repo" : "revanced", "branch" : "main"}}]' | jq '.' > sources.json
+        optionseditor=(5 "Edit Patch Options")
+    else
+        unset optionseditor
     fi
-    patchesrepo=$(jq -r '.[0].patches.repo' sources.json)
-    if [ "$patchesrepo" = "revanced" ]
-    then
-        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources" 5 "Edit Patch Options")
-    elif [ "$patchesrepo" = "inotia00" ]
-    then
-        menuoptions=(1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Update Resources")
-    fi
-    mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${menuoptions[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --begin 5 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
@@ -631,7 +549,7 @@ mainmenu()
             changesource
         elif [ "$mainmenu" -eq "4" ]
         then
-            fetchresources
+            resourcemenu
         elif [ "$mainmenu" -eq 5 ]
         then
             patchoptions
