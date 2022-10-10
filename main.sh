@@ -303,15 +303,7 @@ sucheck()
         su -c 'mv mount_revanced* /data/adb/service.d/ && chmod +x /data/adb/service.d/mount*'
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
-            internet
-            readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-            appver=$("${header[@]}" --begin 5 0 --title ' Version Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
-            exitstatus=$?
-            if [ $exitstatus -ne 0 ]
-            then
-                mainmenu
-                return 0
-            fi
+            versionselector
             fetchapk
             checkpatched
             patchapp
