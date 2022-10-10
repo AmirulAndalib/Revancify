@@ -68,7 +68,7 @@ checkresources()
     ls ./revanced-patches* > /dev/null 2>&1 && patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not found"
     ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not found"
     ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not found"
-    if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Update" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  v$patches_available\nCLI           v$cli_latest  v$cli_available\nIntegrations  v$integrations_latest  v$integrations_available\n\nDo you want to Update Resources?" $fullpageheight $fullpagewidth
+    if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Update" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       $patches_latest   $patches_available\nCLI           $cli_latest   $cli_available\nIntegrations  $integrations_latest   $integrations_available\n\nDo you want to Update Resources?" $fullpageheight $fullpagewidth
     then
         get resources
     else
