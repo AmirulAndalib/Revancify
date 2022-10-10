@@ -9,7 +9,6 @@ with open('sources.json', 'r') as sourcesfile:
 for source in sourcesjson:
     if source['sourceStatus'] == "on":
         patchesrepo = source['sourceMaintainer']
-        patchesbranch = source['jsonBranch']
 
 def openjson():
     global localjson
@@ -24,8 +23,8 @@ def openjson():
 
 openjson()
 
-patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
-remotejson = requests.get(patchesurl).json()
+with open("remotepatches.json", "r") as remotepatches:
+    remotejson = json.load(remotepatches)
 
 remotepatches = []
 localpatches = []
