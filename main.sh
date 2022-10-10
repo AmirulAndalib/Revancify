@@ -68,9 +68,11 @@ checkresources()
     ls ./revanced-patches* > /dev/null 2>&1 && patches_available="v"$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not found"
     ls ./revanced-cli* > /dev/null 2>&1 && cli_available="v"$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not found"
     ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available="v"$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not found"
-    if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Update" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  $patches_available\nCLI           v$cli_latest  $cli_available\nIntegrations  v$integrations_latest  $integrations_available\n\nDo you want to Update Resources?" $fullpageheight $fullpagewidth
+    if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  $patches_available\nCLI           v$cli_latest  $cli_available\nIntegrations  v$integrations_latest  $integrations_available\n\nDo you want to fetch latest resources?" $fullpageheight $fullpagewidth
     then
-        get resources
+        getresources
+        mainmenu
+        return 0
     else
         mainmenu
         return 0
@@ -83,16 +85,15 @@ getresources()
     intro
     echo "Updating resources..."
     echo ""
-    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O remotepatches.json --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
-    wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-v"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
-    wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-v"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     python3 ./python-utils/fetch-patches.py
     echo ""
-    mainmenu
 }
 
 
@@ -110,7 +111,7 @@ changesource()
         availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
         rm remotepatches.json > /dev/null 2>&1
-        fetchresources
+        getresources
     fi
     mainmenu
 }
@@ -182,12 +183,7 @@ patchsaver()
 
 patchoptions()
 {
-    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
-    then
-        :
-    else
-        fetchresources
-    fi
+    checkresources
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
@@ -252,7 +248,7 @@ checkresource()
     then
         return 0
     else
-        fetchresources
+        getresources
     fi
 }
 
