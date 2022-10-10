@@ -26,14 +26,9 @@ openjson()
 with open("remotepatches.json", "r") as remotepatches:
     remotejson = json.load(remotepatches)
 
-remotepatches = []
-localpatches = []
+remotepatches = [key['name'] for key in remotejson]
+localpatches = [key['patchname'] for key in remotejson]
 obsoletepatches = []
-for key in remotejson:
-    remotepatches.append(key['name'])
-
-for key in localjson:
-    localpatches.append(key['patchname'])
 
 
 for patchname in remotepatches:
