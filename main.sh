@@ -304,10 +304,7 @@ sucheck()
         if ! su -c "dumpsys package $pkgname" | grep -q path
         then
             versionselector
-            fetchapk
-            checkpatched
-            patchapp
-            moveapk
+            return 0
         fi
     else
         variant=nonroot
