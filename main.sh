@@ -65,17 +65,9 @@ checkresources()
 
     integrations_latest="${revanced_latest[2]}"
 
-
-    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1
-    then
-        patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3)
-        cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3)
-        integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3)
-    else
-        patches_available="Not found"
-        cli_available="Not found"
-        integrations_available="Not found"
-    fi
+    ls ./revanced-patches* > /dev/null 2>&1 && patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not found"
+    ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not found"
+    ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not found"
     if "${header[@]}" --begin 5 0 --title ' Resources List ' --no-items --defaultno --yes-label "Update" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  v$patches_available\nCLI           v$cli_latest  v$cli_available\nIntegrations  v$integrations_latest  v$integrations_available\n\nDo you want to Update Resources?" $fullpageheight $fullpagewidth
     then
         get resources
@@ -87,6 +79,8 @@ checkresources()
 
 getresources() 
 {  
+    clear
+    intro
     echo "Updating resources..."
     echo ""
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
@@ -115,6 +109,7 @@ changesource()
         source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
         availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
+        rm remotepatches.json > /dev/null 2>&1
         fetchresources
     fi
     mainmenu
@@ -152,7 +147,7 @@ selectpatches()
 {
     if ! ls ./revanced-patches* > /dev/null 2>&1
     then
-        "${header[@]}" --msgbox "No Patches found !!\n Please update resources to edit patches" 10 35
+        "${header[@]}" --msgbox "No Patches found !!\nPlease update resources to edit patches" 10 35
         checkresources
         return 0
     fi
