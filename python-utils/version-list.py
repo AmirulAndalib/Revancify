@@ -13,26 +13,16 @@ def bsurl(url):
 
 
 if sys.argv[1] == "YouTube":
-    with open('sources.json', 'r') as sourcesfile:
-        sourcesjson = json.load(sourcesfile)
-    for source in sourcesjson:
-        if source['sourceStatus'] == "on":
-            patchesrepo = source['sourceMaintainer']
-            patchesbranch = source['jsonBranch']
-    patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
-    for json in (requests.get(patchesurl)).json():
+    with open("remotepatches.json", "r") as remotepatches:
+        remotejson = json.load(remotepatches)
+    for json in remotejson:
         if json['name'] == 'general-ads':
             for appver in (((json['compatiblePackages'])[0])['versions'])[-1:-11:-1]:
                 print(appver)
 elif sys.argv[1] == "YTMusic":
-    with open('sources.json', 'r') as sourcesfile:
-        sourcesjson = json.load(sourcesfile)
-    for source in sourcesjson:
-        if source['sourceStatus'] == "on":
-            patchesrepo = source['sourceMaintainer']
-            patchesbranch = source['jsonBranch']
-    patchesurl =  "".join(["https://raw.githubusercontent.com/", patchesrepo, "/revanced-patches/", patchesbranch,"/patches.json"])
-    for json in (requests.get(patchesurl)).json():
+    with open("remotepatches.json", "r") as remotepatches:
+        remotejson = json.load(remotepatches)
+    for json in remotejson:
         if json['name'] == 'compact-header':
             for appver in (((json['compatiblePackages'])[0])['versions'])[-1:-11:-1]:
                 print(appver)
