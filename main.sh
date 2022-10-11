@@ -56,7 +56,7 @@ intro()
 
 leavecols=$(($(($(tput cols) - 38)) / 2))
 fullpagewidth=$(tput cols)
-fullpageheight=$(($(tput lines) - 5 ))
+fullpageheight=$(($(tput lines) - 4 ))
 header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
 resourcemenu()
@@ -163,7 +163,7 @@ selectpatches()
         resourcemenu
         return 0
     fi
-    patchselectionheight=$(($(tput lines) - 6))
+    patchselectionheight=$(($(tput lines) - 5))
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
     choices=($("${header[@]}" --begin 4 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
@@ -329,9 +329,6 @@ app_dl()
             sleep 0.5s
             tput rc; tput ed
         else
-            echo "$appname update available !!"
-            sleep 0.5s
-            tput rc; tput ed
             rm "$appname"-*.apk
             sleep 0.5s
             echo "Downloading $appname-$appver.apk..."
