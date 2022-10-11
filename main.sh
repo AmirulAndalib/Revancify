@@ -393,7 +393,7 @@ fetchapk()
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
             tput civis
-            applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1
+            applink=$(cat link.txt)
             if [ "$applink" = "error" ]
             then
                 "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Try disabling VPN if you are using one." 10 35
@@ -415,7 +415,7 @@ fetchapk()
     else
         internet
         python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-        applink=$(cat link.txt) && rm link.txt
+        applink=$(cat link.txt)
         if [ "$applink" = "error" ]
         then
             "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Try disabling VPN if you are using one." 10 35
