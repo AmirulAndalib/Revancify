@@ -319,10 +319,10 @@ app_dl()
     internet
     if ls ./"$appname"-* > /dev/null 2>&1
     then
-        app_available=$(basename "$appname"-* .apk | cut -d '-' -f 2) #get version
+        app_available=$(basename "$appname"-* .apk | cut -d '-' -f 2,3) #get version
         if [ "$appver" = "$app_available" ]
         then
-            echo "Latest $appname apk already exists."
+            echo "$appname-$appver.apk already exists."
             echo ""
             sleep 0.5s
             wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
@@ -332,11 +332,9 @@ app_dl()
             echo "$appname update available !!"
             sleep 0.5s
             tput rc; tput ed
-            echo "Removing previous $appname apk..."
-            rm $appname-*.apk
+            rm "$appname"-*.apk
             sleep 0.5s
-            tput rc; tput ed
-            echo "Downloading latest $appname apk..."
+            echo "Downloading $appname-$appver.apk..."
             echo " "
             wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             sleep 0.5s
@@ -345,7 +343,7 @@ app_dl()
     else
         echo "No $appname apk found in Current Directory"
         echo " "
-        echo "Downloading latest $appname apk..."
+        echo "Downloading $appname-$appver.apk..."
         echo " "
         wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
