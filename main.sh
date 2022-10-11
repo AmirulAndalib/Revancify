@@ -394,8 +394,16 @@ fetchapk()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
+            tput civis
             applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1
-            app_dl
+            if [ "$applink" = "error" ]
+            then
+                "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Try disabling VPN if you are using one." 10 35
+                mainmenu
+                return 0
+            else
+                app_dl
+            fi
         else
             if ! "${header[@]}" --begin 4 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
             then
@@ -410,16 +418,30 @@ fetchapk()
         internet
         python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
         applink=$(cat link.txt) && rm link.txt
-        app_dl
+        if [ "$applink" = "error" ]
+        then
+            "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Try disabling VPN if you are using one." 10 35
+            mainmenu
+            return 0
+        else
+            app_dl
+        fi
     fi
 }
 
 patchapp()
 {
-    setargs
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | "${header[@]}" --begin 4 0 --title " Patching $appname " --progressbox $fullpageheight $fullpagewidth &&
-    tput civis
-    sleep 3
+    if ls ./"$appname"-"$appver"* > /dev/null 2>&1
+    then
+        setargs
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | "${header[@]}" --begin 4 0 --title " Patching $appname " --progressbox $fullpageheight $fullpagewidth &&
+        tput civis
+        sleep 3
+    else
+        "${header[@]}" --msgbox "$Appname is not accessible.\nRun Revancify again." 10 35
+        mainmenu
+        return0
+    fi
 }
 
 checkmicrogpatch()
