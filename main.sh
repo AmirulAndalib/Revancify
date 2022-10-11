@@ -394,6 +394,7 @@ fetchapk()
         if ping -c 1 google.com > /dev/null 2>&1
         then
             python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
+            tput civis
             applink=$(cat link.txt) && rm ./link.txt > /dev/null 2>&1
             if [ "$applink" = "error" ]
             then
