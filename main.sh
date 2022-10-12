@@ -7,7 +7,7 @@ trap terminatescript SIGINT
 
 # For update change this sentence here ...
 
-setup()
+sourcesetup()
 {
     if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
     then
@@ -16,16 +16,6 @@ setup()
     then
         tmp=$(mktemp)
         jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
-    fi
-    tmp=$(mktemp)
-    jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
-    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
-    availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
-    optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].optionsCompatible' sources.json)
-    if ! ls ./patches* > /dev/null 2>&1
-    then
-        internet
-        python3 ./python-utils/fetch-patches.py
     fi
 }
 
@@ -130,6 +120,7 @@ changesource()
 
 selectapp()
 {
+    availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
     appname=$("${header[@]}" --begin 4 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${availableapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
@@ -158,11 +149,16 @@ selectapp()
 
 selectpatches()
 {
-    if ! ls ./revanced-patches* > /dev/null 2>&1
+    if ! ls ./remotejson* > /dev/null 2>&1
     then
-        "${header[@]}" --msgbox "No Patches found !!\nPlease update resources to edit patches" 10 35
+        "${header[@]}" --msgbox "No Json file found !!\nPlease update resources to edit patches." 10 35
         resourcemenu
         return 0
+    fi
+    if ! ls ./patches* > /dev/null 2>&1
+    then
+        internet
+        python3 ./python-utils/fetch-patches.py
     fi
     patchselectionheight=$(($(tput lines) - 5))
     declare -a patchesinfo
@@ -515,10 +511,11 @@ buildapp()
         moveapk
     fi
 }
-
+sourcesetup
 mainmenu()
 {
-    setup
+    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+    optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].optionsCompatible' sources.json)
     if [ "$optionscompatible" = true ]
     then
         optionseditor=(5 "Edit Patch Options")
