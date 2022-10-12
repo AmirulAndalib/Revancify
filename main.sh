@@ -7,7 +7,7 @@ trap terminatescript SIGINT
 
 # For update change this sentence here ...
 
-setup()
+sourcesetup()
 {
     if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
     then
@@ -16,16 +16,6 @@ setup()
     then
         tmp=$(mktemp)
         jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
-    fi
-    tmp=$(mktemp)
-    jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
-    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
-    availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
-    optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].optionsCompatible' sources.json)
-    if ! ls ./patches* > /dev/null 2>&1
-    then
-        internet
-        python3 ./python-utils/fetch-patches.py
     fi
 }
 
@@ -56,7 +46,7 @@ intro()
 
 leavecols=$(($(($(tput cols) - 38)) / 2))
 fullpagewidth=$(tput cols)
-fullpageheight=$(($(tput lines) - 5 ))
+fullpageheight=$(($(tput lines) - 4 ))
 header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
 resourcemenu()
@@ -74,7 +64,8 @@ resourcemenu()
     ls ./revanced-patches* > /dev/null 2>&1 && patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not found"
     ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not found"
     ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not found"
-    if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Resource      Latest   Downloaded\n\nPatches       v$patches_latest  $patches_available\nCLI           v$cli_latest  $cli_available\nIntegrations  v$integrations_latest  $integrations_available\n\nDo you want to fetch latest resources?" $fullpageheight $fullpagewidth
+    readarray -t resourcefilelines < <(echo -e "Resource Latest Downloaded\nPatches v$patches_latest $patches_available\nCLI v$cli_latest $cli_available\nIntegrations v$integrations_latest $integrations_available" | column -t -s ' ')
+    if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "${resourcefilelines[0]}\n${resourcefilelines[1]}\n${resourcefilelines[2]}\n${resourcefilelines[3]}\n\nDo you want to fetch latest resources?" $fullpageheight $fullpagewidth
     then
         [ "v$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
         [ "v$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
@@ -129,6 +120,7 @@ changesource()
 
 selectapp()
 {
+    availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
     appname=$("${header[@]}" --begin 4 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${availableapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
@@ -157,13 +149,18 @@ selectapp()
 
 selectpatches()
 {
-    if ! ls ./revanced-patches* > /dev/null 2>&1
+    if ! ls ./remotejson* > /dev/null 2>&1
     then
-        "${header[@]}" --msgbox "No Patches found !!\nPlease update resources to edit patches" 10 35
+        "${header[@]}" --msgbox "No Json file found !!\nPlease update resources to edit patches." 10 35
         resourcemenu
         return 0
     fi
-    patchselectionheight=$(($(tput lines) - 6))
+    if ! ls ./patches* > /dev/null 2>&1
+    then
+        internet
+        python3 ./python-utils/fetch-patches.py
+    fi
+    patchselectionheight=$(($(tput lines) - 5))
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
     choices=($("${header[@]}" --begin 4 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
@@ -329,9 +326,6 @@ app_dl()
             sleep 0.5s
             tput rc; tput ed
         else
-            echo "$appname update available !!"
-            sleep 0.5s
-            tput rc; tput ed
             rm "$appname"-*.apk
             sleep 0.5s
             echo "Downloading $appname-$appver.apk..."
@@ -431,9 +425,10 @@ patchapp()
 {
     if ls ./"$appname"-"$appver"* > /dev/null 2>&1
     then
+        clear
+        intro
         setargs
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | "${header[@]}" --begin 4 0 --title " Patching $appname " --progressbox $fullpageheight $fullpagewidth &&
-        tput civis
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive
         sleep 3
     else
         "${header[@]}" --msgbox "$Appname is not accessible.\nRun Revancify again." 10 35
@@ -516,10 +511,11 @@ buildapp()
         moveapk
     fi
 }
-
+sourcesetup
 mainmenu()
 {
-    setup
+    source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+    optionscompatible=$(jq -r 'map(select(.sourceStatus == "on"))[].optionsCompatible' sources.json)
     if [ "$optionscompatible" = true ]
     then
         optionseditor=(5 "Edit Patch Options")
