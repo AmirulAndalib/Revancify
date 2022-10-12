@@ -149,7 +149,7 @@ selectapp()
 
 selectpatches()
 {
-    if ! ls ./remotejson* > /dev/null 2>&1
+    if ! ls ./remotepatches* > /dev/null 2>&1
     then
         "${header[@]}" --msgbox "No Json file found !!\nPlease update resources to edit patches." 10 35
         resourcemenu
