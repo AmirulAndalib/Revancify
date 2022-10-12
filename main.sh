@@ -61,9 +61,9 @@ resourcemenu()
 
     integrations_latest="${revanced_latest[2]}"
 
-    ls ./revanced-patches* > /dev/null 2>&1 && patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not found"
-    ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not found"
-    ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not found"
+    ls ./revanced-patches* > /dev/null 2>&1 && patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not-found"
+    ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not-found"
+    ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not-found"
     readarray -t resourcefilelines < <(echo -e "Resource Latest Downloaded\nPatches v$patches_latest $patches_available\nCLI v$cli_latest $cli_available\nIntegrations v$integrations_latest $integrations_available" | column -t -s ' ')
     if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "${resourcefilelines[0]}\n${resourcefilelines[1]}\n${resourcefilelines[2]}\n${resourcefilelines[3]}\n\nDo you want to fetch latest resources?" $fullpageheight $fullpagewidth
     then
@@ -149,7 +149,7 @@ selectapp()
 
 selectpatches()
 {
-    if ! ls ./remotejson* > /dev/null 2>&1
+    if ! ls ./remotepatches* > /dev/null 2>&1
     then
         "${header[@]}" --msgbox "No Json file found !!\nPlease update resources to edit patches." 10 35
         resourcemenu
