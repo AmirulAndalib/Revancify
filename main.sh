@@ -485,7 +485,7 @@ buildapp()
         sucheck
         if [ "$variant" = "root" ]
         then
-            rootver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2)
+            rootver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p')
             appver=${rootver:=$appver}
             checkmicrogpatch
         elif [ "$variant" = "nonroot" ]
