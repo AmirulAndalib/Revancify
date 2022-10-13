@@ -17,10 +17,10 @@ installdependencies()
     sleep 0.5s
     git pull
     pkg update -y &&
-    pkg install python openjdk-17 wget ncurses-utils dialog jq -y
-    pip install --upgrade pip
-    pip install wheel
-    pip install requests bs4
+    pkg install python openjdk-17 wget ncurses-utils dialog jq -y &&
+    pip install --upgrade pip &&
+    pip install wheel &&
+    pip install requests bs4 &&
     cp dialog-config.txt ~/.dialogrc
     cp revancify ~/../usr/bin
     sed -i '/allow-external-apps/s/# //' ~/.termux/termux.properties
