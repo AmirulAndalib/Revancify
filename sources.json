@@ -1,0 +1,23 @@
+[
+  {
+    "sourceMaintainer": "revanced",
+    "sourceStatus": "on",
+    "availableApps": [
+      "YouTube",
+      "YTMusic",
+      "Twitter",
+      "Reddit",
+      "TikTok"
+    ],
+    "optionsCompatible": true
+  },
+  {
+    "sourceMaintainer": "inotia00",
+    "sourceStatus": "off",
+    "availableApps": [
+      "YouTube",
+      "YTMusic"
+    ],
+    "optionsCompatible": false
+  }
+]
