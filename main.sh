@@ -11,11 +11,10 @@ sourcesetup()
 {
     if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
     then
-        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : false}]' | jq '.' > sources.json
-    elif [ $(jq '.[0] | has("jsonBranch")' sources.json) = true ]
-    then
+        echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : true}]' | jq '.' > sources.json
+    else
         tmp=$(mktemp)
-        jq 'map(del(.jsonBranch))' sources.json > "$tmp" && mv "$tmp" sources.json
+        jq '.[1].optionsCompatible = true' sources.json > "$tmp" && mv "$tmp" sources.json
     fi
 }
 
