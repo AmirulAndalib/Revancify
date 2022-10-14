@@ -45,7 +45,8 @@ then
     then
         tput civis
         rm -rf ./*cache
-        git pull > /dev/null 2>&1
+        git checkout .
+        git pull
         cp dialog-config.txt ~/.dialogrc
         cp revancify ~/../usr/bin/revancify
         bash main.sh
