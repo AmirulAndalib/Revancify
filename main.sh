@@ -69,6 +69,7 @@ resourcemenu()
         [ "v$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
         [ "v$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
         [ "v$integrations_latest" != "$integrations_available" ] && rm revanced-integrations* > /dev/null 2>&1
+        rm remotepatches.json > /dev/null 2>&1
         getresources
         mainmenu
         return 0
