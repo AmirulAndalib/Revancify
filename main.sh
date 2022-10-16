@@ -205,14 +205,12 @@ mountapk()
     PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete &&\
     mv /data/local/tmp/revanced.delete /data/adb/revanced/"$PKGNAME".apk &&\
-    MAGISKTMP="$(magisk --path)" || MAGISKTMP=/sbin &&\
-    MIRROR="$MAGISKTMP/.magisk/mirror" &&\
     stockapp=$(pm path $PKGNAME | grep base | sed "s/package://g") &&\
     revancedapp=/data/adb/revanced/"$PKGNAME".apk &&\
     chmod 644 "$revancedapp" &&\
     chown system:system "$revancedapp" &&\
     chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
-    mount -o bind "$MIRROR""$revancedapp" "$stockapp" &&\
+    mount -o bind "$revancedapp" "$stockapp" &&\
     am force-stop $PKGNAME' > /dev/null 2>&1
     sleep 1
     if [ "$pkgname" = "com.google.android.youtube" ]
