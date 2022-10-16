@@ -194,7 +194,7 @@ patchoptions()
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
-    "${header[@]}" --begin 4 0 --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
+    "${header[@]}" --begin 4 0 --ok-label "Save" --cancel-label "Exit" --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
     mainmenu
 }
@@ -203,17 +203,14 @@ mountapk()
 {   
     "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
     PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
-    pm install ./"$APPNAME"-"$APPVER".apk &&\
     cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete &&\
     mv /data/local/tmp/revanced.delete /data/adb/revanced/"$PKGNAME".apk &&\
-    MAGISKTMP="$(magisk --path)" || MAGISKTMP=/sbin &&\
-    MIRROR="$MAGISKTMP/.magisk/mirror" &&\
     stockapp=$(pm path $PKGNAME | grep base | sed "s/package://g") &&\
     revancedapp=/data/adb/revanced/"$PKGNAME".apk &&\
     chmod 644 "$revancedapp" &&\
     chown system:system "$revancedapp" &&\
     chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
-    mount -o bind "$MIRROR""$revancedapp" "$stockapp" &&\
+    mount -o bind "$revancedapp" "$stockapp" &&\
     am force-stop $PKGNAME' > /dev/null 2>&1
     sleep 1
     if [ "$pkgname" = "com.google.android.youtube" ]
@@ -299,11 +296,8 @@ sucheck()
         su -c "mkdir -p /data/adb/revanced"
         echo -e "#!/system/bin/sh\nMAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin\nMIRROR=\"\$MAGISKTMP/.magisk/mirror\"\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$pkgname".apk\"\nstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$MIRROR\$base_path \$stock_path" > ./mount_revanced_$pkgname.sh
         su -c 'mv mount_revanced* /data/adb/service.d/ && chmod +x /data/adb/service.d/mount*'
-        if ! su -c "dumpsys package $pkgname" | grep -q path
-        then
-            versionselector
-            return 0
-        fi
+        termux-open "https://play.google.com/store/apps/details?id="$pkgname
+        mainmenu
     else
         variant=nonroot
         dlmicrog
@@ -486,8 +480,7 @@ buildapp()
         sucheck
         if [ "$variant" = "root" ]
         then
-            rootver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p')
-            appver=${rootver:=$appver}
+            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p')
             checkmicrogpatch
         elif [ "$variant" = "nonroot" ]
         then
@@ -512,6 +505,7 @@ buildapp()
         moveapk
     fi
 }
+
 sourcesetup
 mainmenu()
 {
