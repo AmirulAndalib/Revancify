@@ -298,8 +298,11 @@ sucheck()
         su -c "mkdir -p /data/adb/revanced"
         echo -e "#!/system/bin/sh\nMAGISKTMP=\"\$(magisk --path)\" || MAGISKTMP=/sbin\nMIRROR=\"\$MAGISKTMP/.magisk/mirror\"\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$pkgname".apk\"\nstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$MIRROR\$base_path \$stock_path" > ./mount_revanced_$pkgname.sh
         su -c 'mv mount_revanced* /data/adb/service.d/ && chmod +x /data/adb/service.d/mount*'
-        termux-open "https://play.google.com/store/apps/details?id="$pkgname
-        mainmenu
+        if ! PKGNAME=$pkgname su -c 'dumpsys package $PKGNAME | grep patch'
+        then 
+            termux-open "https://play.google.com/store/apps/details?id="$pkgname
+            mainmenu
+        fi
     else
         variant=nonroot
         dlmicrog
