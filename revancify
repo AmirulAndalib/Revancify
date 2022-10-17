@@ -50,6 +50,8 @@ then
         cp revancify ~/../usr/bin/revancify
         bash main.sh
     else
+        cp dialog-config.txt ~/.dialogrc
+        cp revancify ~/../usr/bin/revancify
         installdependencies &&
         tput civis &&
         bash main.sh
