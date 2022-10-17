@@ -313,7 +313,6 @@ app_dl()
             sleep 0.5s
             wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             sleep 0.5s
-            tput rc; tput ed
         else
             rm "$appname"-*.apk
             sleep 0.5s
@@ -321,7 +320,6 @@ app_dl()
             echo " "
             wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             sleep 0.5s
-            tput rc; tput ed
         fi
     else
         echo "No $appname apk found in Current Directory"
@@ -330,12 +328,12 @@ app_dl()
         echo " "
         wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
-        tput rc; tput ed
     fi
     if [ "$dlexit" -eq 0 ]
     then
         wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.223212-223212002/microg.apk" -O "Vanced_MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     fi
+    tput rc; tput ed
 }
 
 setargs()
