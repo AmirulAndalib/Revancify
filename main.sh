@@ -227,7 +227,7 @@ moveapk()
 {
     mkdir -p /storage/emulated/0/Revancify/
     mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
-    [[ -f Vanced_MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced_MicroG.apk
+    [[ -f Vanced-MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
     mainmenu
     return 0
@@ -236,16 +236,8 @@ moveapk()
 
 dlmicrog()
 {
-    if "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
-        then
-            intro
-            wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.223212-223212002/microg.apk" -O "Vanced_MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            echo ""
-            mkdir -p /storage/emulated/0/Revancify
-            mv "Vanced_MicroG.apk" /storage/emulated/0/Revancify/
-            echo MicroG App saved to Revancify folder.
-            sleep 1s
-    fi
+    "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
+    dlexit=$?
 }
 
 checkresources()
@@ -303,7 +295,6 @@ sucheck()
         fi
     else
         variant=nonroot
-        dlmicrog
     fi
 }
 
@@ -322,7 +313,6 @@ app_dl()
             sleep 0.5s
             wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             sleep 0.5s
-            tput rc; tput ed
         else
             rm "$appname"-*.apk
             sleep 0.5s
@@ -330,7 +320,6 @@ app_dl()
             echo " "
             wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
             sleep 0.5s
-            tput rc; tput ed
         fi
     else
         echo "No $appname apk found in Current Directory"
@@ -339,8 +328,13 @@ app_dl()
         echo " "
         wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
-        tput rc; tput ed
     fi
+    if [ "$dlexit" -eq 0 ]
+    then
+        echo "Downloading Vanced-MicroG.apk"
+        wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.223212-223212002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    fi
+    tput rc; tput ed
 }
 
 setargs()
@@ -368,8 +362,9 @@ versionselector()
 {
     checkresources
     readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    appver=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    verchoosed=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
     exitstatus=$?
+    appver=$(echo "$verchoosed" | cut -d " " -f 1)
     if [ $exitstatus -ne 0 ]
     then
         mainmenu
@@ -426,10 +421,11 @@ patchapp()
         clear
         intro
         setargs
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive
+        echo "Patching $appname..."
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | tee ./patchlog.txt
         sleep 3
     else
-        "${header[@]}" --msgbox "$Appname is not accessible.\nRun Revancify again." 10 35
+        "${header[@]}" --msgbox "$appname is not accessible.\nRun Revancify again." 10 35
         mainmenu
         return0
     fi
@@ -488,6 +484,7 @@ buildapp()
         elif [ "$variant" = "nonroot" ]
         then
             versionselector
+            dlmicrog
         fi
         checkpatched
         fetchapk
