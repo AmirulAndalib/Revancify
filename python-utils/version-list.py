@@ -22,7 +22,7 @@ if sys.argv[1] == "YouTube":
         if appver.replace("YouTube ", "") in supportedvers:
             print(appver.replace("YouTube ", "") + " [Supported]")
         else:
-            print(appver.replace("YouTube ", "")).replace(" beta", " [Beta]")
+            print(appver.replace("YouTube ", "").replace(" beta", " [Beta]"))
 elif sys.argv[1] == "YTMusic":
     with open("remotepatches.json", "r") as remotepatches:
         remotejson = json.load(remotepatches)

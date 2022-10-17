@@ -426,7 +426,7 @@ patchapp()
         java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | tee ./patchlog.txt
         sleep 3
     else
-        "${header[@]}" --msgbox "$Appname is not accessible.\nRun Revancify again." 10 35
+        "${header[@]}" --msgbox "$appname is not accessible.\nRun Revancify again." 10 35
         mainmenu
         return0
     fi
