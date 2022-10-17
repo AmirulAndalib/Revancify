@@ -363,8 +363,9 @@ versionselector()
 {
     checkresources
     readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    appver=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty | cut -d " " -f 1)
+    verchoosed=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
     exitstatus=$?
+    appver=$(echo "$verchoosed" | cut -d " " -f 1)
     if [ $exitstatus -ne 0 ]
     then
         mainmenu
@@ -421,7 +422,8 @@ patchapp()
         clear
         intro
         setargs
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive
+        echo "Patching $appname..."
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | tee ./patchlog.txt
         sleep 3
     else
         "${header[@]}" --msgbox "$Appname is not accessible.\nRun Revancify again." 10 35
