@@ -227,7 +227,7 @@ moveapk()
 {
     mkdir -p /storage/emulated/0/Revancify/
     mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
-    [[ -f Vanced_MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced_MicroG.apk
+    [[ -f Vanced-MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
     mainmenu
     return 0
@@ -331,7 +331,8 @@ app_dl()
     fi
     if [ "$dlexit" -eq 0 ]
     then
-        wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.223212-223212002/microg.apk" -O "Vanced_MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        echo "Downloading Vanced-MicroG.apk"
+        wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.223212-223212002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     fi
     tput rc; tput ed
 }
