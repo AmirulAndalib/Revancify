@@ -227,7 +227,7 @@ moveapk()
 {
     mkdir -p /storage/emulated/0/Revancify/
     mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
-    [[ -f Vanced-MicroG.apk ]] && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
+    [[ -f Vanced-MicroG.apk ]] && mv Vanced-MicroG.apk /storage/emulated/0/Revancify/ && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
     mainmenu
     return 0
