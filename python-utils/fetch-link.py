@@ -50,9 +50,9 @@ try:
         apppage1= "".join(["https://apkmirror.com", bsurl(appurl).find(["span"], text="APK").parent.find(["a"], class_="accent_color")['href']])
 
 
-    print(30, flush=True)
+    print(33, flush=True)
     apppage2= "".join(["https://apkmirror.com", bsurl(apppage1).find(["a"], { 'class' : re.compile("accent_bg btn btn-flat downloadButton")})['href']])
-    print(60, flush=True)
+    print(66, flush=True)
     appdllink = "".join(["https://apkmirror.com", bsurl(apppage2).find(rel="nofollow")['href']])
     print(100, flush=True)
 
