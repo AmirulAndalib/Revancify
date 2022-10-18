@@ -21,8 +21,7 @@ installdependencies()
     pip install --upgrade pip &&
     pip install wheel &&
     pip install requests bs4 &&
-    cp dialog-config.txt ~/.dialogrc &&
-    cp revancify ~/../usr/bin &&
+    cp dialog-config.txt ~/.dialogrc
     sed -i '/allow-external-apps/s/# //' ~/.termux/termux.properties &&
     echo "Dependencies installed successfully."
 }
@@ -34,6 +33,7 @@ checkrevancify()
         return 0
     else
         echo "Revancify is not installed"
+        exit
     fi
 }
 
@@ -50,6 +50,7 @@ then
         cp revancify ~/../usr/bin/revancify
         bash main.sh
     else
+        cp revancify ~/../usr/bin/revancify
         installdependencies &&
         tput civis &&
         bash main.sh
