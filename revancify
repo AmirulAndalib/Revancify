@@ -66,6 +66,7 @@ else
         bash main.sh
         cd ~
     else
+        cp revancify ~/../usr/bin/revancify
         echo "Dependencies not installed. Run again with internet connection."
     fi
 fi
