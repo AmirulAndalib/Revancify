@@ -3,7 +3,7 @@
 
 checkdependencies()
 {
-    if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ -e ~/../usr/bin/revancify ] && pip list | grep -e wheel -e bs4 -e requests > /dev/null 2>&1
+    if [ -e ~/../usr/bin/java ] && [ -e ~/../usr/bin/python ] && [ -e ~/../usr/bin/wget ] && [ -e ~/../usr/bin/dialog ] && [ -e ~/../usr/bin/tput ] && [ -e ~/../usr/bin/jq ] && [ -e ~/../usr/bin/revancify ] && pip list | grep -q wheel && pip list | grep -q bs4 && pip list | grep -q requests
     then
         return 0
     else
