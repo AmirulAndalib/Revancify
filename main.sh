@@ -153,7 +153,7 @@ selectpatches()
         resourcemenu
         return 0
     fi
-    if ! ls ./patches* > /dev/null 2>&1
+    if ! ls ./saved-patches* > /dev/null 2>&1
     then
         internet
         python3 ./python-utils/sync-patches.py
