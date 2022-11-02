@@ -367,6 +367,7 @@ fetchapk()
     checkpatched
     internet
     applink=$( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
+    tput civis
     if [ "$applink" = "error" ]
     then
         "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
