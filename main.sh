@@ -410,7 +410,7 @@ checkmicrogpatch()
             return 0
         else
             tmp=$(mktemp)
-            jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*")).status = "off")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
+            jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*"))).status = "off")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
             return 0
         fi
     elif [ "$microgstatus" = "off" ] && [ "$variant" = "nonroot" ]
@@ -420,7 +420,7 @@ checkmicrogpatch()
             return 0
         else
             tmp=$(mktemp)
-            jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*")).status = "on")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
+            jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*"))).status = "on")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
             return 0
         fi
     fi
