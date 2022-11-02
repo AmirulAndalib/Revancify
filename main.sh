@@ -299,14 +299,14 @@ app_dl()
         echo "$appname-$appver.apk already exists."
         echo ""
         sleep 0.5s
-        wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c "$applink" -O ./"$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
     else
         rm -rf ./"$appname"* > /dev/null 2>&1
         echo " "
         echo "Downloading $appname-$appver.apk..."
         echo " "
-        wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c "$applink" -O ./"$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
     fi
 }
@@ -361,7 +361,7 @@ versionselector()
     fi
 }
 
-fetchapk()
+fetchlink()
 {
     checkpatched
     internet
@@ -374,7 +374,6 @@ fetchapk()
     else
         app_dl
     fi
-    apkargs="-a $appname-$appver.apk -o "$appname"Revanced"-$appver.apk"
     dlmicrog
 }
 
@@ -386,7 +385,7 @@ patchapp()
         intro
         setargs
         echo "Patching $appname..."
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
         patchstatus="${PIPESTATUS[0]}"
         sleep 2
         if [ "$patchstatus" = 1 ]
@@ -458,7 +457,7 @@ buildapp()
             dlmicrog
         fi
         checkpatched
-        fetchapk
+        fetchlink
         patchapp
         if [ "$variant" = "root" ]
         then
@@ -471,7 +470,7 @@ buildapp()
     else
         versionselector
         checkpatched
-        fetchapk
+        fetchlink
         patchapp
         moveapk
     fi
