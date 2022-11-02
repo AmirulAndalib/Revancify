@@ -26,7 +26,7 @@ def openjson():
 
 openjson()
 
-with open("remotesaved-patches.json", "r") as patches:
+with open("patches.json", "r") as patches:
     remotejson = load(patches)
 
 patches = [key['name'] for key in remotejson]
