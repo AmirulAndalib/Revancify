@@ -335,11 +335,9 @@ setargs()
             riplibs="--rip-lib arm64-v8a --rip-lib x86_64 --rip-lib x86"
         fi
     fi
-    if [ "$optionscompatible" = true ]
+    if [ "$optionscompatible" = true ] && ls ./options* > /dev/null 2>&1
     then
         optionsarg="--options options.toml"
-    else
-        unset optionsarg
     fi
 }
 
@@ -399,6 +397,7 @@ patchapp()
     else
         ls > /storage/emulated/0/Revancify/crashlog.txt
         "${header[@]}" --msgbox "Patching failed. Patchlog saved to Revancify folder.\nShare the Patchlog to developer." 10 35
+        mainmenu
     fi
 }
 
