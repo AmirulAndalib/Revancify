@@ -402,33 +402,26 @@ patchapp()
 
 checkmicrogpatch()
 {
-    if [ "$pkgname" = "com.google.android.youtube" ] && [ "$variant" = "root" ]
+    microgstatus=$(jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*"))))[].status' saved-patches.json)
+    if [ "$microgstatus" = "on" ] && [ "$variant" = "root" ]
     then
-        microgstatus=$(jq -r 'map(select(.patchname == "microg-support"))[].status' saved-patches.json)
-        if [ "$microgstatus" = "on" ]
+        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to exclude it or continue?" "$fullpageheight" "$fullpagewidth"
         then
-            if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" "$fullpageheight" "$fullpagewidth"
-            then
-                return 0
-            else
-                tmp=$(mktemp)
-                jq -r 'map(select(.patchname == "microg-support").status = "off")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
-                return 0
-            fi
+            return 0
+        else
+            tmp=$(mktemp)
+            jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*")).status = "off")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
+            return 0
         fi
-    elif [ "$pkgname" = "com.google.android.apps.youtube.music" ] && [ "$variant" = "root" ]
+    elif [ "$microgstatus" = "off" ] && [ "$variant" = "nonroot" ]
     then
-        microgstatus=$(jq -r 'map(select(.patchname == "music-microg-support"))[].status' saved-patches.json)
-        if [ "$microgstatus" = "on" ]
+        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a non-rooted device and you have not included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to include it or continue?" "$fullpageheight" "$fullpagewidth"
         then
-            if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" "$fullpageheight" "$fullpagewidth"
-            then
-                return 0
-            else
-                tmp=$(mktemp)
-                jq -r 'map(select(.patchname == "music-microg-support").status = "off")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
-                return 0
-            fi
+            return 0
+        else
+            tmp=$(mktemp)
+            jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*")).status = "on")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
+            return 0
         fi
     fi
 }
