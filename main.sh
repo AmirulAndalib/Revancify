@@ -205,7 +205,7 @@ mountapk()
     "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
     PKGNAME=$pkgname su -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done' > /dev/null 2>&1
     revancedapp=/data/adb/revanced/$pkgname.apk
-    su -mm -c "cp {$appname}Revanced-$appver.apk /data/local/tmp/revanced.delete &&\
+    su -mm -c "cp ${appname}Revanced-$appver.apk /data/local/tmp/revanced.delete &&\
     mv /data/local/tmp/revanced.delete $revancedapp &&\
     chmod 644 $revancedapp &&\
     chown system:system $revancedapp &&\
