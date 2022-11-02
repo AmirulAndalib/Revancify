@@ -203,16 +203,16 @@ patchoptions()
 mountapk()
 {   
     "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
-    pkgname=$pkgname appver=$appver appname=$appname su -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
-    revancedapp=/data/adb/revanced/$pkgname.apk &&\
-    stockapp=$(pm path $pkgname | sed -n "/base/s/package://p") &&\
-    su -mm -c "cp ${appname}Revanced-$appver.apk /data/local/tmp/revanced.delete &&\
-    mv /data/local/tmp/revanced.delete $revancedapp &&\
-    chmod 644 $revancedapp &&\
-    chown system:system $revancedapp &&\
-    chcon u:object_r:apk_data_file:s0 $revancedapp &&\
-    mount -o bind $revancedapp $stockapp &&\
-    am force-stop $pkgname' > /dev/null 2>&1
+    pkgname=$pkgname appver=$appver appname=$appname su -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l; done &&\
+    revancedapp="/data/adb/revanced/$pkgname.apk" &&\
+    stockapp=$(pm path "$pkgname" | sed -n "/base/s/package://p") &&\
+    su -mm -c "cp $"appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete &&\
+    mv /data/local/tmp/revanced.delete "$revancedapp" &&\
+    chmod 644 "$revancedapp" &&\
+    chown system:system "$revancedapp" &&\
+    chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
+    mount -o bind "$revancedapp" "$stockapp" &&\
+    am force-stop "$pkgname"' > /dev/null 2>&1
     echo -e "#!/system/bin/sh\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nif [ \$(dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p') =  \"$appver\" ]\nthen\n\tbase_path=\"/data/adb/revanced/$pkgname.apk\"\n\tstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\n\tchcon u:object_r:apk_data_file:s0 \$base_path\n\tmount -o bind \$base_path \$stock_path\nfi" > ./mount_revanced_$pkgname.sh
     su -c "mv mount_revanced_$pkgname.sh /data/adb/service.d && chmod +x /data/adb/service.d/mount_revanced_$pkgname.sh"
     sleep 1
