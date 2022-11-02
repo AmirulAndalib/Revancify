@@ -7,7 +7,7 @@ then
     read -N 1 -s -r -p $'Press ENTER to CONTINUE or SPACE to EXIT...\n' key
     if [ "$key" = " " ]
     then
-        clear
+        echo "Script terminated"
         exit
     fi
 fi
