@@ -69,7 +69,7 @@ resourcemenu()
         [ "v$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
         [ "v$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
         [ "v$integrations_latest" != "$integrations_available" ] && rm revanced-integrations* > /dev/null 2>&1
-        rm remotepatches.json > /dev/null 2>&1
+        rm patches.json > /dev/null 2>&1
         getresources
         mainmenu
         return 0
@@ -85,7 +85,7 @@ getresources()
     echo "Fetching resources..."
     echo ""
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O remotepatches.json --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O patches.json --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
     wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-v"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     echo ""
@@ -147,7 +147,7 @@ selectapp()
 
 selectpatches()
 {
-    if ! ls ./remotepatches* > /dev/null 2>&1
+    if ! ls ./patches* > /dev/null 2>&1
     then
         "${header[@]}" --msgbox "No Json file found !!\nPlease update resources to edit patches." 10 35
         resourcemenu
@@ -234,7 +234,7 @@ promptmicrog()
 
 checkresources()
 {
-    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1 && ls ./remotepatches* > /dev/null 2>&1
+    if ls ./revanced-patches* > /dev/null 2>&1 && ls ./revanced-cli* > /dev/null 2>&1 && ls ./revanced-integrations* > /dev/null 2>&1 && ls ./patches* > /dev/null 2>&1
     then
         return 0
     else
@@ -391,12 +391,12 @@ patchapp()
         if [ "$patchstatus" = 1 ]
         then
             mv ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
-            "${header[@]}" --msgbox "Patching failed. Patchlog saved to Revancify folder.\nShare the Patchlog to developer." 10 35
+            "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder.Share the Patchlog to developer." 10 35
             mainmenu
         fi
     else
         ls > /storage/emulated/0/Revancify/crashlog.txt
-        "${header[@]}" --msgbox "Patching failed. Patchlog saved to Revancify folder.\nShare the Patchlog to developer." 10 35
+        "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder.Share the Patchlog to developer." 10 35
         mainmenu
     fi
 }
