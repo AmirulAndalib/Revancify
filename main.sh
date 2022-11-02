@@ -66,7 +66,7 @@ resourcemenu()
     ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not-found"
     ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not-found"
     readarray -t resourcefilelines < <(echo -e "Resource Latest Downloaded\nPatches v$patches_latest $patches_available\nCLI v$cli_latest $cli_available\nIntegrations v$integrations_latest $integrations_available" | column -t -s ' ')
-    if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Current Source: $source\n\n${resourcefilelines[0]}\n${resourcefilelines[1]}\n${resourcefilelines[2]}\n${resourcefilelines[3]}\n\nDo you want to fetch latest resources?" $fullpageheight $fullpagewidth
+    if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Current Source: $source\n\n${resourcefilelines[0]}\n${resourcefilelines[1]}\n${resourcefilelines[2]}\n${resourcefilelines[3]}\n\nDo you want to fetch latest resources?" "$fullpageheight" "$fullpagewidth"
     then
         [ "v$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
         [ "v$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
@@ -203,18 +203,17 @@ patchoptions()
 mountapk()
 {   
     "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
-    PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
-    cp /data/data/com.termux/files/home/storage/Revancify/"$APPNAME"Revanced-"$APPVER".apk /data/local/tmp/revanced.delete &&\
-    mv /data/local/tmp/revanced.delete /data/adb/revanced/"$PKGNAME".apk &&\
-    stockapp=$(pm path $PKGNAME | grep base | sed "s/package://g") &&\
-    revancedapp=/data/adb/revanced/"$PKGNAME".apk &&\
-    chmod 644 "$revancedapp" &&\
-    chown system:system "$revancedapp" &&\
-    chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
-    mount -o bind "$revancedapp" "$stockapp" &&\
-    am force-stop $PKGNAME' > /dev/null 2>&1
+    PKGNAME=$pkgname APPNAME=$appname APPVER=$appver su -mm -c 'grep $PKGNAME /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done'
+    revancedapp=/data/adb/revanced/$pkgname.apk
+    su -c "cp /data/data/com.termux/files/home/storage/Revancify/{$appname}Revanced-$appver.apk /data/local/tmp/revanced.delete &&\
+    mv /data/local/tmp/revanced.delete /data/adb/revanced/$pkgname.apk &&\
+    chmod 644 $revancedapp &&\
+    chown system:system $revancedapp &&\
+    chcon u:object_r:apk_data_file:s0 $revancedapp &&\
+    mount -o bind $revancedapp $(pm path $pkgname | grep base | sed "s/package://g") &&\
+    am force-stop $pkgname" > /dev/null 2>&1
     echo -e "#!/system/bin/sh\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nif [ \$(dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p') =  \"$appver\" ]\nthen\n\tbase_path=\"/data/adb/revanced/$pkgname.apk\"\n\tstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\n\tchcon u:object_r:apk_data_file:s0 \$base_path\n\tmount -o bind \$base_path \$stock_path\nfi" > ./mount_revanced_$pkgname.sh
-    su -c 'mv mount_revanced* /data/local/tmp && mv /data/local/tmp /data/adb/service.d/ && chmod +x /data/adb/service.d/mount*'
+    su -c "mv mount_revanced_$pkgname.sh /data/local/tmp && mv /data/local/tmp/mount_revanced_$pkgname.sh /data/adb/service.d/ && chmod +x /data/adb/service.d/mount_revanced_$pkgname.sh"
     sleep 1
     su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n" > /dev/null 2>&1
     su -c 'pidof com.termux | xargs kill -9'
@@ -252,7 +251,7 @@ checkpatched()
     then
         if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" "$fullpageheight" "$fullpagewidth"
             then
                 rm ./"$appname"Revanced-"$appver"*
             else
@@ -265,7 +264,7 @@ checkpatched()
     then
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if ! "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" $fullpageheight $fullpagewidth
+            if ! "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" "$fullpageheight" "$fullpagewidth"
             then
                 moveapk
             fi
@@ -334,7 +333,6 @@ setargs()
             riplibs="--rip-lib arm64-v8a --rip-lib x86_64 --rip-lib x86"
         fi
     fi
-    cp "$(which aapt2)" ./binaries/
     if [ "$optionscompatible" = true ] && ls ./options* > /dev/null 2>&1
     then
         optionsarg="--options options.toml"
