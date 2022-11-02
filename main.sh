@@ -389,11 +389,10 @@ patchapp()
         setargs
         echo "Patching $appname..."
         java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
-        patchstatus="${PIPESTATUS[0]}"
         sleep 2
-        if [ "$patchstatus" -ne 0 ]
+        if ! grep -q "Finished" patchlog.txt
         then
-            mv ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
+            cp ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
             "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder.Share the Patchlog to developer." 10 35
             mainmenu
         fi
