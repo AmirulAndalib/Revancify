@@ -366,7 +366,6 @@ fetchapk()
 {
     checkpatched
     internet
-    remotesize
     applink=$( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
     if [ "$applink" = "error" ]
     then
@@ -383,22 +382,19 @@ fetchapk()
 
 patchapp()
 {
-    if ls ./saved-patches* > /dev/null 2>&1 && ls ./"$appname"-"$appver"* > /dev/null 2>&1
+    if ! ls ./saved-patches* > /dev/null 2>&1
     then
-        intro
-        setargs
-        echo "Patching $appname..."
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
-        sleep 2
-        if ! grep -q "Finished" patchlog.txt
-        then
-            cp ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
-            "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder.Share the Patchlog to developer." 10 35
-            mainmenu
-        fi
-    else
-        ls > /storage/emulated/0/Revancify/crashlog.txt
-        "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder.Share the Patchlog to developer." 10 35
+        python3 ./python-utils/sync-patches.py
+    fi
+    intro
+    setargs
+    echo "Patching $appname..."
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
+    sleep 2
+    if ! grep -q "Finished" patchlog.txt
+    then
+        cp ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
+        "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder. Share the Patchlog to developer." 10 35
         mainmenu
     fi
 }
