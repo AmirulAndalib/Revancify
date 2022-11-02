@@ -25,11 +25,11 @@ try:
 
         appurl = f'https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-{argv[2].replace(".","-")}-release/'
 
-        if argv[2] == "arm64":
+        if argv[3] == "arm64":
 
             apppage1 = f"https://www.apkmirror.com{fetchurl(appurl).find(['div'], text='arm64-v8a').parent.find(['a'], class_='accent_color')['href']}"
         
-        elif argv[2] == "armeabi":
+        elif argv[3] == "armeabi":
 
             apppage1 = f"https://www.apkmirror.com{fetchurl(appurl).find(['div'], text='armeabi-v7a').parent.find(['a'], class_='accent_color')['href']}"
 
