@@ -214,7 +214,7 @@ mountapk()
     mount -o bind "$revancedapp" "$stockapp" &&\
     am force-stop $PKGNAME' > /dev/null 2>&1
     sleep 1
-    su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n"
+    su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n" > /dev/null 2>&1
     su -c 'pidof com.termux | xargs kill -9'
 }
 
