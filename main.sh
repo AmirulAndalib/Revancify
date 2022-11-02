@@ -290,43 +290,34 @@ sucheck()
     fi
 }
 
-# App Downloader
 app_dl()
 {
     intro
     internet
-    if ls ./"$appname"-* > /dev/null 2>&1
+    if ls ./"$appname"-"$appver"* > /dev/null 2>&1
     then
-        app_available=$(basename "$appname"-* .apk | cut -d '-' -f 2,3) #get version
-        if [ "$appver" = "$app_available" ]
-        then
-            echo "$appname-$appver.apk already exists."
-            echo ""
-            sleep 0.5s
-            wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            sleep 0.5s
-        else
-            rm "$appname"-*.apk
-            sleep 0.5s
-            echo "Downloading $appname-$appver.apk..."
-            echo " "
-            wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-            sleep 0.5s
-        fi
+        echo "$appname-$appver.apk already exists."
+        echo ""
+        sleep 0.5s
+        wget -q -c "$applink" -O ./"$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        sleep 0.5s
     else
-        echo "No $appname apk found in Current Directory"
+        rm -rf ./"$appname"* > /dev/null 2>&1
         echo " "
         echo "Downloading $appname-$appver.apk..."
         echo " "
-        wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c "$applink" -O ./"$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
     fi
-    if [ "$dlexit" -eq 0 ]
+}
+
+dlmicrog()
+{
+    if [ "$dlexit" -eq 0 ] > /dev/null 2>&1
     then
-        echo ""
+        internet
         echo "Downloading Vanced-MicroG.apk"
-        echo ""
-        wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.223212-223212002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.224113-224113002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     fi
     tput rc; tput ed
 }
@@ -372,61 +363,42 @@ versionselector()
     fi
 }
 
-fetchapk()
+fetchlink()
 {
-    if ls ./"$appname"* > /dev/null 2>&1
+    checkpatched
+    internet
+    applink=$( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
+    if [ "$applink" = "error" ]
     then
-        if ping -c 1 google.com > /dev/null 2>&1
-        then
-            python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-            tput civis
-            applink=$(cat link.txt)
-            if [ "$applink" = "error" ]
-            then
-                "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Try disabling VPN if you are using one." 10 35
-                mainmenu
-                return 0
-            else
-                app_dl
-            fi
-        else
-            if ! "${header[@]}" --begin 4 0 --title ' APK file found ' --no-items --defaultno --keep-window --no-shadow --yesno "$appname apk file with version $appver already exists. It may be partially downloaded which can result in build error.\n\n\nDo you want to continue with this apk file?" $fullpageheight $fullpagewidth
-            then
-                internet
-            else
-                appver=$(basename "$appname"-* .apk | cut -d '-' -f 2)
-                clear
-                return 0
-            fi
-        fi
+        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
+        mainmenu
+        return 0
     else
-        internet
-        python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" | "${header[@]}" --gauge "Fetching $appname Download Link" 10 35 0
-        applink=$(cat link.txt)
-        if [ "$applink" = "error" ]
-        then
-            "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Try disabling VPN if you are using one." 10 35
-            mainmenu
-            return 0
-        else
-            app_dl
-        fi
+        app_dl
     fi
+    dlmicrog
 }
+
 
 patchapp()
 {
-    intro
-    setargs
-    echo "Patching $appname..."
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
-    patchstatus="${PIPESTATUS[0]}"
-    sleep 2
-    if [ "$patchstatus" = 1 ]
+    if ls ./saved-patches* > /dev/null 2>&1 && ls ./"$appname"-"$appver"* > /dev/null 2>&1
     then
-        mv ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
+        intro
+        setargs
+        echo "Patching $appname..."
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
+        patchstatus="${PIPESTATUS[0]}"
+        sleep 2
+        if [ "$patchstatus" = 1 ]
+        then
+            mv ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
+            "${header[@]}" --msgbox "Patching failed. Patchlog saved to Revancify folder.\nShare the Patchlog to developer." 10 35
+            mainmenu
+        fi
+    else
+        ls > /storage/emulated/0/Revancify/crashlog.txt
         "${header[@]}" --msgbox "Patching failed. Patchlog saved to Revancify folder.\nShare the Patchlog to developer." 10 35
-        mainmenu
     fi
 }
 
@@ -486,7 +458,7 @@ buildapp()
             dlmicrog
         fi
         checkpatched
-        fetchapk
+        fetchlink
         patchapp
         if [ "$variant" = "root" ]
         then
@@ -499,7 +471,7 @@ buildapp()
     else
         versionselector
         checkpatched
-        fetchapk
+        fetchlink
         patchapp
         moveapk
     fi
