@@ -1,5 +1,9 @@
-import re
-import sys
+"""
+Fetch the link for the app and version specified by the arguments passed.
+"""
+
+from re import compile
+from sys import argv, stderr
 from requests import get, Session
 from bs4 import BeautifulSoup
 
@@ -10,57 +14,57 @@ def fetchurl(url):
 
 try:
 
-    if sys.argv[1] == "YouTube":
+    if argv[1] == "YouTube":
 
-        appurl = "".join(["https://www.apkmirror.com/apk/google-inc/youtube/youtube-", sys.argv[2].replace(".","-"), "-release/"])
+        appurl = f'https://www.apkmirror.com/apk/google-inc/youtube/youtube-{argv[2].replace(".","-")}-release/'
 
-        apppage1= "".join(["https://apkmirror.com", fetchurl(appurl).find(["span"], text="APK").parent.find(["a"], class_="accent_color")['href']])
-
-
-
-    elif sys.argv[1] == "YTMusic":
-
-        appurl = "".join(["https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-", sys.argv[2].replace(".","-"), "-release/"])
-
-        if sys.argv[3] == "arm64":
-
-            apppage1 = "".join(["https://www.apkmirror.com", fetchurl(appurl).find(["div"], text="arm64-v8a").parent.find(["a"], class_="accent_color")['href']])
-
-        elif sys.argv[3] == "armeabi":
-
-            apppage1 = "".join(["https://www.apkmirror.com", fetchurl(appurl).find(["div"], text="armeabi-v7a").parent.find(["a"], class_="accent_color")['href']])
+        apppage1= f"https://apkmirror.com{fetchurl(appurl).find(['span'], text='APK').parent.find(['a'], class_='accent_color')['href']}"
 
 
+    elif argv[1] == "YTMusic":
 
-    elif sys.argv[1] == "Twitter":
+        appurl = f'https://www.apkmirror.com/apk/google-inc/youtube-music/youtube-music-{argv[2].replace(".","-")}-release/'
 
-            appurl = "".join(["https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-", sys.argv[2].replace(".","-"), "-release/"])
+        if argv[2] == "arm64":
 
-            apppage1= "".join(["https://apkmirror.com", fetchurl(appurl).find(["span"], text="APK").parent.find(["a"], class_="accent_color")['href']])
+            apppage1 = f"https://www.apkmirror.com{fetchurl(appurl).find(['div'], text='arm64-v8a').parent.find(['a'], class_='accent_color')['href']}"
+        
+        elif argv[2] == "armeabi":
+
+            apppage1 = f"https://www.apkmirror.com{fetchurl(appurl).find(['div'], text='armeabi-v7a').parent.find(['a'], class_='accent_color')['href']}"
 
 
-    elif sys.argv[1] == "Reddit":
+    elif argv[1] == "Twitter":
 
-        appurl = "".join(["https://www.apkmirror.com/apk/reddditinc/reddit/reddit-", sys.argv[2].replace(".","-"), "-release/"])
+        appurl = f'https://www.apkmirror.com/apk/twitter-inc/twitter/twitter-{argv[2].replace(".","-")}-release/'
 
-        apppage1= "".join(["https://apkmirror.com", fetchurl(appurl).find(["span"], text="APK").parent.find(["a"], class_="accent_color")['href']])
+        apppage1= f"https://apkmirror.com{fetchurl(appurl).find(['span'], text='APK').parent.find(['a'], class_='accent_color')['href']}"
 
-    elif sys.argv[1] == "TikTok":
 
-        appurl = "".join(["https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok/tik-tok-", sys.argv[2].replace(".","-"), "-release/"])
+    elif argv[1] == "Reddit":
 
-        apppage1= "".join(["https://apkmirror.com", fetchurl(appurl).find(["span"], text="APK").parent.find(["a"], class_="accent_color")['href']])
+        appurl = f'https://www.apkmirror.com/apk/reddditinc/reddit/reddit-{argv[2].replace(".","-")}-release/'
+
+        apppage1= f"https://apkmirror.com{fetchurl(appurl).find(['span'], text='APK').parent.find(['a'], class_='accent_color')['href']}"
+
+
+    elif argv[1] == "TikTok":
+
+        appurl = f'https://www.apkmirror.com/apk/tiktok-pte-ltd/tik-tok/tik-tok-{argv[2].replace(".","-")}-release/'
+
+        apppage1= f"https://apkmirror.com{fetchurl(appurl).find(['span'], text='APK').parent.find(['a'], class_='accent_color')['href']}"
 
 
     print(33, flush=True)
-    apppage2= "".join(["https://apkmirror.com", fetchurl(apppage1).find(["a"], { 'class' : re.compile("accent_bg btn btn-flat downloadButton")})['href']])
+
+    apppage2= f"https://apkmirror.com{fetchurl(apppage1).find(['a'], { 'class' : compile('accent_bg btn btn-flat downloadButton')})['href']}"
+
     print(66, flush=True)
-    appdllink = "".join(["https://apkmirror.com", fetchurl(apppage2).find(rel="nofollow")['href']])
+    appdllink = f"https://apkmirror.com{fetchurl(apppage2).find(rel='nofollow')['href']}"
     print(100, flush=True)
 
-    with open("link.txt", 'w') as link:
-        link.write(appdllink)
+    stderr.write(appdllink)
+
 
 except Exception as e:
-    with open("link.txt", 'w') as link:
-        link.write("error")
+    stderr.write("error")

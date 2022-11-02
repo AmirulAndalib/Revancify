@@ -1,26 +1,17 @@
-import requests
-import json
+"""
+Fetch latest version from the github of the corresponding source repository.
+"""
 
-
+from requests import get, Session
+from json import load
 
 with open('sources.json', 'r') as sourcesfile:
-    sourcesjson = json.load(sourcesfile)
+    sourcesjson = load(sourcesfile)
 
 for source in sourcesjson:
     if source['sourceStatus'] == "on":
         sourcemaintainer = source['sourceMaintainer']
 
-
-patchesurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-patches/releases/latest"])
-cliurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-cli/releases/latest"])
-integrationsurl = "".join(["https://api.github.com/repos/", sourcemaintainer, "/revanced-integrations/releases/latest"])
-
-
-requests_session = requests.Session()
-patches_version = (((requests_session.get(patchesurl)).json())['tag_name']).replace("v", "")
-cli_version = (((requests_session.get(cliurl)).json())['tag_name']).replace("v", "")
-integrations_version = (((requests_session.get(integrationsurl)).json())['tag_name']).replace("v", "")
-
-print(patches_version)
-print(cli_version)
-print(integrations_version)
+components = [ "patches", "cli", "integrations" ]
+for component in components:
+    print(get(f"https://api.github.com/repos/{sourcemaintainer}/revanced-{component}/releases/latest").json()['tag_name'].replace("v", ""))

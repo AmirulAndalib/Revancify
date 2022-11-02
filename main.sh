@@ -81,7 +81,6 @@ resourcemenu()
 
 getresources() 
 {
-    clear
     intro
     echo "Fetching resources..."
     echo ""
@@ -101,7 +100,7 @@ changesource()
     internet
     source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
     allsources=($(jq -r '.[] | "\(.sourceMaintainer) \(.sourceStatus)"' sources.json))
-    selectedsource=$("${header[@]}" --begin 4 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" $fullpageheight $fullpagewidth 10 "${allsources[@]}" 2>&1> /dev/tty)
+    selectedsource=$("${header[@]}" --begin 4 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" "$fullpageheight" "$fullpagewidth" 10 "${allsources[@]}" 2>&1> /dev/tty)
     tmp=$(mktemp)
     jq -r 'map(select(.).sourceStatus = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.sourceMaintainer == $selectedsource).sourceStatus = "on")' > "$tmp" && mv "$tmp" sources.json
     if [ "$source" != "$selectedsource" ]
@@ -109,7 +108,7 @@ changesource()
         source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
         availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
-        rm remotepatches.json > /dev/null 2>&1
+        rm patches.json > /dev/null 2>&1
         mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
         patches_latest="${revanced_latest[0]}" && cli_latest="${revanced_latest[1]}" && integrations_latest="${revanced_latest[2]}"
         getresources
@@ -119,8 +118,8 @@ changesource()
 
 selectapp()
 {
-    availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
-    appname=$("${header[@]}" --begin 4 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 "${availableapps[@]}" 2>&1> /dev/tty)
+    readarray -t availableapps < <(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json)
+    appname=$("${header[@]}" --begin 4 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" "$fullpageheight" "$fullpagewidth" 10 "${availableapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
@@ -157,12 +156,12 @@ selectpatches()
     if ! ls ./patches* > /dev/null 2>&1
     then
         internet
-        python3 ./python-utils/fetch-patches.py
+        python3 ./python-utils/sync-patches.py
     fi
     patchselectionheight=$(($(tput lines) - 5))
     declare -a patchesinfo
-    readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' patches.json)
-    choices=($("${header[@]}" --begin 4 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight $fullpagewidth 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
+    readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' saved-patches.json)
+    choices=("$("${header[@]}" --begin 4 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight "$fullpagewidth" 10 "${patchesinfo[@]}" 2>&1 >/dev/tty)")
     selectpatchstatus=$?
     patchsaver
 }
@@ -172,17 +171,17 @@ patchsaver()
     if [ $selectpatchstatus -eq 0 ]
     then
         tmp=$(mktemp)
-        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json | jq 'map(select(IN(.patchname; $ARGS.positional[])).status = "on")' --args "${choices[@]}" > "$tmp" && mv "$tmp" ./patches.json
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' saved-patches.json | jq 'map(select(IN(.patchname; $ARGS.positional[])).status = "on")' --args "${choices[@]}" > "$tmp" && mv "$tmp" ./saved-patches.json
         mainmenu
     elif [ $selectpatchstatus -eq 2 ]
     then
         tmp=$(mktemp)
-        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' patches.json > "$tmp" && mv "$tmp" ./patches.json
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "off")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
         selectpatches
     elif [ $selectpatchstatus -eq 3 ]
     then
         tmp=$(mktemp)
-        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "on")' patches.json > "$tmp" && mv "$tmp" ./patches.json
+        jq --arg pkgname "$pkgname" 'map(select(.appname == $pkgname).status = "on")' saved-patches.json > "$tmp" && mv "$tmp" ./saved-patches.json
         selectpatches
     fi
 }
@@ -194,7 +193,7 @@ patchoptions()
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
-    "${header[@]}" --begin 4 0 --ok-label "Save" --cancel-label "Exit" --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml $fullpageheight $fullpagewidth 2> "$tmp" && mv "$tmp" ./options.toml
+    "${header[@]}" --begin 4 0 --ok-label "Save" --cancel-label "Exit" --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml "$fullpageheight" "$fullpagewidth" 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
     mainmenu
 }
@@ -213,13 +212,7 @@ mountapk()
     mount -o bind "$revancedapp" "$stockapp" &&\
     am force-stop $PKGNAME' > /dev/null 2>&1
     sleep 1
-    if [ "$pkgname" = "com.google.android.youtube" ]
-    then
-        su -c 'am start -n com.google.android.youtube/com.google.android.apps.youtube.app.watchwhile.WatchWhileActivity' > /dev/null 2>&1
-    elif [ "$pkgname" = "com.google.android.apps.youtube.music" ]
-    then
-        su -c 'am start -n com.google.android.apps.youtube.music/com.google.android.apps.youtube.music.activities.MusicActivity' > /dev/null 2>&1
-    fi
+    su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n"
     su -c 'pidof com.termux | xargs kill -9'
 }
 
@@ -233,10 +226,9 @@ moveapk()
     return 0
 }
 
-
-dlmicrog()
+promptmicrog()
 {
-    "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" $fullpageheight $fullpagewidth
+    "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" "$fullpageheight" "$fullpagewidth"
     dlexit=$?
 }
 
@@ -331,7 +323,9 @@ app_dl()
     fi
     if [ "$dlexit" -eq 0 ]
     then
+        echo ""
         echo "Downloading Vanced-MicroG.apk"
+        echo ""
         wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.223212-223212002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     fi
     tput rc; tput ed
@@ -339,7 +333,7 @@ app_dl()
 
 setargs()
 {
-    includepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "on"))[].patchname' patches.json | sed "s/^/-i /g"))
+    includepatches=$(while read -r line; do printf %s"$line" " "; done < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname and .status == "on"))[].patchname' saved-patches.json | sed "s/^/-i /g"))
     if [ "$source" = "inotia00" ] && [ "$appname" = "YouTube" ]
     then
         if [ "$arch" = "arm64" ]
@@ -361,15 +355,21 @@ setargs()
 versionselector()
 {
     checkresources
-    readarray -t appverlist < <(python3 ./python-utils/version-list.py "$appname")
-    verchoosed=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" $fullpageheight $fullpagewidth 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    internet
+    readarray -t appverlist < <(python3 ./python-utils/fetch-versions.py "$appname")
+    if [ "${appverlist[0]}" = "error" ]
+    then
+        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
+        mainmenu
+    fi
+    verchoosed=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" "$fullpageheight" "$fullpagewidth" 10 "${appverlist[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     appver=$(echo "$verchoosed" | cut -d " " -f 1)
     if [ $exitstatus -ne 0 ]
     then
         mainmenu
+        return 0
     fi
-
 }
 
 fetchapk()
@@ -416,18 +416,17 @@ fetchapk()
 
 patchapp()
 {
-    if ls ./"$appname"-"$appver"* > /dev/null 2>&1
+    intro
+    setargs
+    echo "Patching $appname..."
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
+    patchstatus="${PIPESTATUS[0]}"
+    sleep 2
+    if [ "$patchstatus" = 1 ]
     then
-        clear
-        intro
-        setargs
-        echo "Patching $appname..."
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./"$appname"-"$appver".apk $includepatches --keystore ./revanced.keystore -o ./"$appname"Revanced-"$appver".apk $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive | tee ./patchlog.txt
-        sleep 3
-    else
-        "${header[@]}" --msgbox "$appname is not accessible.\nRun Revancify again." 10 35
+        mv ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
+        "${header[@]}" --msgbox "Patching failed. Patchlog saved to Revancify folder.\nShare the Patchlog to developer." 10 35
         mainmenu
-        return0
     fi
 }
 
@@ -517,7 +516,7 @@ mainmenu()
     else
         unset optionseditor
     fi
-    mainmenu=$("${header[@]}" --begin 4 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" $fullpageheight $fullpagewidth 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --begin 4 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" "$fullpageheight" "$fullpagewidth" 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then

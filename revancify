@@ -1,5 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
+if [ "$(getprop ro.product.cpu.abi | cut -d "-" -f 1)" = "armeabi" ]
+then
+    echo "Device with CPU architecture \"armeabi-v7a\" are not supported for patching."
+    echo "You may get build errors."
+    read -N 1 -s -r -p $'Press ENTER to CONTINUE or SPACE to EXIT...\n' key
+    if [ "$key" = " " ]
+    then
+        clear
+        exit
+    fi
+fi
 
 checkdependencies()
 {
@@ -21,14 +32,14 @@ installdependencies()
     pip install --upgrade pip &&
     pip install wheel &&
     pip install requests bs4 &&
-    cp dialog-config.txt ~/.dialogrc
-    sed -i '/allow-external-apps/s/# //' ~/.termux/termux.properties &&
+    cp dialog-config.txt /data/data/com.termux/files/home/.dialogrc
+    sed -i '/allow-external-apps/s/# //' /data/data/com.termux/files/home/.termux/termux.properties &&
     echo "Dependencies installed successfully."
 }
 
 checkrevancify()
 {
-    if cd ~/storage/Revancify > /dev/null 2>&1 
+    if cd /data/data/com.termux/files/home/storage/Revancify > /dev/null 2>&1 
     then
         return 0
     else
@@ -46,11 +57,11 @@ then
         rm -rf ./*cache
         git checkout . > /dev/null 2>&1
         git pull
-        cp dialog-config.txt ~/.dialogrc
-        cp revancify ~/../usr/bin/revancify
+        grep -q decipher /data/data/com.termux/files/home/.dialogrc || wget -q "https://raw.githubusercontent.com/decipher3114/MyConfigs/main/.dialogrc" -O /data/data/com.termux/files/home/.dialogrc
+        cp revancify /data/data/com.termux/files/home/../usr/bin/revancify
         bash main.sh
     else
-        cp revancify ~/../usr/bin/revancify
+        cp revancify /data/data/com.termux/files/home/../usr/bin/revancify
         installdependencies &&
         tput civis &&
         bash main.sh
@@ -66,7 +77,7 @@ else
         bash main.sh
         cd ~
     else
-        cp revancify ~/../usr/bin/revancify
+        cp revancify /data/data/com.termux/files/home/../usr/bin/revancify
         echo "Dependencies not installed. Run again with internet connection."
     fi
 fi
