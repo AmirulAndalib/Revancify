@@ -10,7 +10,7 @@ trap terminatescript SIGINT
 setup()
 {
     arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
-
+    mkdir -p /storage/emulated/0/Revancify
     if ! ls ./sources* > /dev/null 2>&1 || [ "$(jq '.[0] | has("sourceMaintainer")' sources.json)" = false ] > /dev/null 2>&1
     then
         echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : true}]' | jq '.' > sources.json
@@ -220,7 +220,6 @@ mountapk()
 
 moveapk()
 {
-    mkdir -p /storage/emulated/0/Revancify/
     mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
     [[ -f Vanced-MicroG.apk ]] && mv Vanced-MicroG.apk /storage/emulated/0/Revancify/ && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
