@@ -361,7 +361,7 @@ versionselector()
     fi
 }
 
-fetchlink()
+fetchapk()
 {
     checkpatched
     internet
@@ -374,6 +374,7 @@ fetchlink()
     else
         app_dl
     fi
+    apkargs="-a $appname-$appver.apk -o ${appname}Revanced-$appver.apk"
     dlmicrog
 }
 
@@ -385,7 +386,7 @@ patchapp()
         intro
         setargs
         echo "Patching $appname..."
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
         patchstatus="${PIPESTATUS[0]}"
         sleep 2
         if [ "$patchstatus" = 1 ]
@@ -457,7 +458,7 @@ buildapp()
             dlmicrog
         fi
         checkpatched
-        fetchlink
+        fetchapk
         patchapp
         if [ "$variant" = "root" ]
         then
@@ -470,7 +471,7 @@ buildapp()
     else
         versionselector
         checkpatched
-        fetchlink
+        fetchapk
         patchapp
         moveapk
     fi
