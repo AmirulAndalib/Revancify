@@ -454,7 +454,6 @@ buildapp()
             versionselector
             dlmicrog
         fi
-        checkpatched
         fetchapk
         patchapp
         if [ "$variant" = "root" ]
@@ -467,7 +466,6 @@ buildapp()
 
     else
         versionselector
-        checkpatched
         fetchapk
         patchapp
         moveapk
