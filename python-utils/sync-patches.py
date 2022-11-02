@@ -1,5 +1,5 @@
 """
-Sync the 
+Sync saved-patches from patches
 """
 
 from json import load, dump
