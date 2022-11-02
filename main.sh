@@ -415,7 +415,7 @@ checkmicrogpatch()
         fi
     elif [ "$microgstatus" = "off" ] && [ "$variant" = "nonroot" ]
     then
-        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a non-rooted device and you have not included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to include it or continue?" "$fullpageheight" "$fullpagewidth"
+        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Include" --yesno "You have a non-rooted device and you have not included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to include it or continue?" "$fullpageheight" "$fullpagewidth"
         then
             return 0
         else
@@ -442,12 +442,12 @@ buildapp()
         if [ "$variant" = "root" ]
         then
             appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p')
-            checkmicrogpatch
         elif [ "$variant" = "nonroot" ]
         then
             versionselector
             dlmicrog
         fi
+        checkmicrogpatch
         fetchapk
         patchapp
         if [ "$variant" = "root" ]
