@@ -7,9 +7,11 @@ trap terminatescript SIGINT
 
 # For update change this sentence here ...
 
-sourcesetup()
+setup()
 {
-    if ! ls ./sources* > /dev/null 2>&1 || [ $(jq '.[0] | has("sourceMaintainer")' sources.json) = false ] > /dev/null 2>&1
+    arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
+
+    if ! ls ./sources* > /dev/null 2>&1 || [ "$(jq '.[0] | has("sourceMaintainer")' sources.json)" = false ] > /dev/null 2>&1
     then
         echo '[{"sourceMaintainer" : "revanced", "sourceStatus" : "on", "availableApps": ["YouTube", "YTMusic", "Twitter", "Reddit", "TikTok"], "optionsCompatible" : true},{"sourceMaintainer" : "inotia00", "sourceStatus" : "off", "availableApps": ["YouTube", "YTMusic"], "optionsCompatible" : true}]' | jq '.' > sources.json
     else
@@ -270,8 +272,6 @@ checkpatched()
     fi
 }
 
-arch=$(getprop ro.product.cpu.abi | cut -d "-" -f 1)
-
 sucheck()
 {
     if su -c exit > /dev/null 2>&1
@@ -335,6 +335,7 @@ setargs()
             riplibs="--rip-lib arm64-v8a --rip-lib x86_64 --rip-lib x86"
         fi
     fi
+    cp "$(which aapt2)" ./binaries/
     if [ "$optionscompatible" = true ] && ls ./options* > /dev/null 2>&1
     then
         optionsarg="--options options.toml"
@@ -365,6 +366,7 @@ fetchapk()
 {
     checkpatched
     internet
+    remotesize
     applink=$( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
     if [ "$applink" = "error" ]
     then
@@ -386,10 +388,10 @@ patchapp()
         intro
         setargs
         echo "Patching $appname..."
-        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2 $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
+        java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
         patchstatus="${PIPESTATUS[0]}"
         sleep 2
-        if [ "$patchstatus" = 1 ]
+        if [ "$patchstatus" -ne 0 ]
         then
             mv ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
             "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder.Share the Patchlog to developer." 10 35
@@ -409,7 +411,7 @@ checkmicrogpatch()
         microgstatus=$(jq -r 'map(select(.patchname == "microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a microg-support patch. This may result in YouTube app crash.\n\n\nDo you want to exclude it or continue?" "$fullpageheight" "$fullpagewidth"
             then
                 return 0
             else
@@ -423,7 +425,7 @@ checkmicrogpatch()
         microgstatus=$(jq -r 'map(select(.patchname == "music-microg-support"))[].status' patches.json)
         if [ "$microgstatus" = "on" ]
         then
-            if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" $fullpageheight $fullpagewidth
+            if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included a music-microg-support patch. This may result in YT Music app crash.\n\n\nDo you want to exclude it or continue?" "$fullpageheight" "$fullpagewidth"
             then
                 return 0
             else
@@ -477,7 +479,7 @@ buildapp()
     fi
 }
 
-sourcesetup
+setup
 mainmenu()
 {
     source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
