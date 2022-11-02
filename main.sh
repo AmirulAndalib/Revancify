@@ -213,7 +213,7 @@ mountapk()
     chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
     mount -o bind "$revancedapp" "$stockapp" &&\
     am force-stop $PKGNAME' > /dev/null 2>&1
-    echo -e "#!/system/bin/sh\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nbase_path=\"/data/adb/revanced/"$pkgname".apk\"\nstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\nchcon u:object_r:apk_data_file:s0 \$base_path\nmount -o bind \$base_path \$stock_path" > ./mount_revanced_$pkgname.sh
+    echo -e "#!/system/bin/sh\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nif [ \$(dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p') =  \"$appver\" ]\nthen\n\tbase_path=\"/data/adb/revanced/$pkgname.apk\"\n\tstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\n\tchcon u:object_r:apk_data_file:s0 \$base_path\n\tmount -o bind \$base_path \$stock_path\nfi" > ./mount_revanced_$pkgname.sh
     su -c 'mv mount_revanced* /data/local/tmp && mv /data/local/tmp /data/adb/service.d/ && chmod +x /data/adb/service.d/mount*'
     sleep 1
     su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n" > /dev/null 2>&1
