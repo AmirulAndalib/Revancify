@@ -308,7 +308,7 @@ app_dl()
     sleep 0.5s
     wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     sleep 0.5s
-    if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d \t -f 1)" ]
+    if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d $'\t' -f 1)" ]
     then
         "${header[@]}" --msgbox "Oh No !!\nUnable to complete download. Please Check your internet connection." 10 35
         mainmenu
@@ -371,7 +371,7 @@ fetchapk()
     checkpatched
     if ls ./"$appname"-"$appver"* > /dev/null 2>&1
     then
-        if [ "$([ -f ."$appname"size ] && cat ."$appname"size || echo "0" )" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d \t -f 1 || echo "None")" ]
+        if [ "$([ -f ."$appname"size ] && cat ."$appname"size || echo "0" )" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d $'\t' -f 1 || echo "None")" ]
         then
             app_dl
         fi
