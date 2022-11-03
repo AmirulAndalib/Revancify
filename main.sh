@@ -308,7 +308,7 @@ app_dl()
         wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
     fi
-    if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d " " -f 1)" ]
+    if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d \t -f 1)" ]
     then
         "${header[@]}" --msgbox "Oh No !!\nUnable to complete download. Please Check your internet connection." 10 35
         mainmenu
@@ -369,7 +369,7 @@ versionselector()
 fetchapk()
 {
     checkpatched
-    if [ "$([ -f ."$appname"size ] && cat ."$appname"size || echo "0" )" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d " " -f 1 || echo "None")" ]
+    if [ "$([ -f ."$appname"size ] && cat ."$appname"size || echo "0" )" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d \t -f 1 || echo "None")" ]
     then
         internet
         readarray -t fetchlinkresponse < <( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
