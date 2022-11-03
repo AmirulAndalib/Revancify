@@ -68,7 +68,7 @@ resourcemenu()
     readarray -t resourcefilelines < <(echo -e "Resource Latest Downloaded\nPatches v$patches_latest $patches_available\nCLI v$cli_latest $cli_available\nIntegrations v$integrations_latest $integrations_available" | column -t -s ' ')
     if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Current Source: $source\n\n${resourcefilelines[0]}\n${resourcefilelines[1]}\n${resourcefilelines[2]}\n${resourcefilelines[3]}\n\nDo you want to fetch latest resources?" "$fullpageheight" -1
     then
-        if [ "v$patches_latest" = "$patches_available" ] && [ "v$cli_latest" = "$cli_available" ] && [ "v$integrations_latest" = "$integrations_available" ]
+        if [ "v$patches_latest" = "$patches_available" ] && [ "v$cli_latest" = "$cli_available" ] && [ "v$integrations_latest" = "$integrations_available" ] && [ "${revanced_latest[3]}" = "$(du -b revanced-cli* | cut -d $'\t' -f 1)" ] && [ "${revanced_latest[1]}" = "$(du -b revanced-patches* | cut -d $'\t' -f 1)" ] && [ "${revanced_latest[5]}" = "$(du -b revanced-integrations* | cut -d $'\t' -f 1)" ] > /dev/null 2>&1
         then
             "${header[@]}" --msgbox "Woah !!\nEverything is up-to-date." 12 40
             mainmenu
@@ -76,7 +76,6 @@ resourcemenu()
             [ "v$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
             [ "v$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
             [ "v$integrations_latest" != "$integrations_available" ] && rm revanced-integrations* > /dev/null 2>&1
-            rm patches.json > /dev/null 2>&1
             getresources
             mainmenu
         fi
@@ -87,13 +86,13 @@ resourcemenu()
 
 getresources() 
 {
-    [ "${revanced_latest[3]}" != "$(du -b revanced-cli* | cut -d $'\t' -f 1)" ] && ( wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-v"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: CLI\nVersion : $cli_latest\nSize    : $cli_size\n\nDownloading ..." 12 40 )
+    [ "${revanced_latest[3]}" != "$(du -b revanced-cli* | cut -d $'\t' -f 1)" ] > /dev/null 2>&1 && wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-v"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: CLI\nVersion : $cli_latest\nSize    : $cli_size\n\nDownloading ..." 12 40
     tput civis
     rm patches.json > /dev/null 2>&1
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O patches.json --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    [ "${revanced_latest[1]}" != "$(du -b revanced-patches* | cut -d $'\t' -f 1)" ] && ( wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: Patches\nVersion : $patches_latest\nSize    : $patches_size\n\nDownloading ..." 12 40 )
+    [ "${revanced_latest[1]}" != "$(du -b revanced-patches* | cut -d $'\t' -f 1)" ] > /dev/null 2>&1 && wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: Patches\nVersion : $patches_latest\nSize    : $patches_size\n\nDownloading ..." 12 40
     tput civis
-    [ "${revanced_latest[5]}" != "$(du -b revanced-integrations* | cut -d $'\t' -f 1)" ] && ( wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-v"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: Integrations\nVersion : $integrations_latest\nSize    : $integrations_size\n\nDownloading ..." 12 40 )
+    [ "${revanced_latest[5]}" != "$(du -b revanced-integrations* | cut -d $'\t' -f 1)" ] > /dev/null 2>&1 && wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-v"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: Integrations\nVersion : $integrations_latest\nSize    : $integrations_size\n\nDownloading ..." 12 40
     tput civis
     python3 ./python-utils/sync-patches.py
 }
@@ -110,9 +109,7 @@ changesource()
     if [ "$source" != "$selectedsource" ]
     then
         source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
-        availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
-        rm patches.json > /dev/null 2>&1
         mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
         patches_latest="${revanced_latest[0]}"
         patches_size="$(numfmt --to=iec --format="%0.1f" "${revanced_latest[1]}")"
