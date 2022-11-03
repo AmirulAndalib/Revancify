@@ -308,6 +308,12 @@ app_dl()
         wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
         sleep 0.5s
     fi
+    if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d " " -f 1)" ]
+    then
+        "${header[@]}" --msgbox "Oh No !!\nUnable to complete download. Please Check your internet connection." 10 35
+        mainmenu
+    fi
+        
 }
 
 dlmicrog()
@@ -363,16 +369,21 @@ versionselector()
 fetchapk()
 {
     checkpatched
-    internet
-    applink=$( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
-    tput civis
-    if [ "$applink" = "error" ]
+    if [ "$([ -f ."$appname"size ] && cat ."$appname"size)" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d " " -f 1)" ]
     then
-        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
-        mainmenu
-        return 0
-    else
-        app_dl
+        internet
+        readarray -t fetchlinkresponse < <( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
+        applink="${fetchlinkresponse[0]}"
+        echo "${fetchlinkresponse[1]}" > ."$appname"size
+        tput civis
+        if [ "$applink" = "error" ]
+        then
+            "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
+            mainmenu
+            return 0
+        else
+            app_dl
+        fi
     fi
     apkargs="-a $appname-$appver.apk -o ${appname}Revanced-$appver.apk"
     dlmicrog

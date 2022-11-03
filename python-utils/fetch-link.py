@@ -63,7 +63,8 @@ try:
     appdllink = f"https://apkmirror.com{fetchurl(apppage2).find(rel='nofollow')['href']}"
     print(100, flush=True)
 
-    stderr.write(appdllink)
+    stderr.write(f'{appdllink}\n')
+    stderr.write(get(appdllink, stream=True, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64)'}).headers['Content-length'])
 
 
 except Exception as e:
