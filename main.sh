@@ -109,6 +109,7 @@ changesource()
     if [ "$source" != "$selectedsource" ]
     then
         source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
+        availableapps=($(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json))
         rm revanced-* > /dev/null 2>&1
         mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
         patches_latest="${revanced_latest[0]}"
