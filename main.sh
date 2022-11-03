@@ -291,23 +291,23 @@ sucheck()
 
 app_dl()
 {
-    intro
     internet
-    if ls ./"$appname"-"$appver"* > /dev/null 2>&1
+    readarray -t fetchlinkresponse < <( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
+    tput civis
+    applink="${fetchlinkresponse[0]}"
+    echo "${fetchlinkresponse[1]}" > ."$appname"size
+    if [ "$applink" = "error" ]
     then
-        echo "$appname-$appver.apk already exists."
-        echo ""
-        sleep 0.5s
-        wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-        sleep 0.5s
-    else
-        rm -rf ./"$appname"* > /dev/null 2>&1
-        echo " "
-        echo "Downloading $appname-$appver.apk..."
-        echo " "
-        wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-        sleep 0.5s
+        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
+        mainmenu
+        return 0
     fi
+    intro
+    echo "$appname-$appver.apk already exists."
+    echo ""
+    sleep 0.5s
+    wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    sleep 0.5s
     if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d \t -f 1)" ]
     then
         "${header[@]}" --msgbox "Oh No !!\nUnable to complete download. Please Check your internet connection." 10 35
@@ -369,21 +369,15 @@ versionselector()
 fetchapk()
 {
     checkpatched
-    if [ "$([ -f ."$appname"size ] && cat ."$appname"size || echo "0" )" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d \t -f 1 || echo "None")" ]
+    if ls ./"$appname"-"$appver"* > /dev/null 2>&1
     then
-        internet
-        readarray -t fetchlinkresponse < <( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
-        applink="${fetchlinkresponse[0]}"
-        echo "${fetchlinkresponse[1]}" > ."$appname"size
-        tput civis
-        if [ "$applink" = "error" ]
+        if [ "$([ -f ."$appname"size ] && cat ."$appname"size || echo "0" )" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d \t -f 1 || echo "None")" ]
         then
-            "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
-            mainmenu
-            return 0
-        else
             app_dl
         fi
+    else
+        rm ./"$appname"-"$appver".apk > /dev/null 2>&1
+        app_dl
     fi
     apkargs="-a $appname-$appver.apk -o ${appname}Revanced-$appver.apk"
     dlmicrog
