@@ -14,4 +14,9 @@ for source in sourcesjson:
 
 components = [ "patches", "cli", "integrations" ]
 for component in components:
-    print(get(f"https://api.github.com/repos/{sourcemaintainer}/revanced-{component}/releases/latest").json()['tag_name'].replace("v", ""))
+    json = get(f"https://api.github.com/repos/{sourcemaintainer}/revanced-{component}/releases/latest").json()
+    print(json['tag_name'].replace("v", ""))
+    size = 0
+    for i in json['assets']:
+        size += int(i['size'])
+    print(size)

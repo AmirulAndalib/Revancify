@@ -26,7 +26,7 @@ internet()
     then
         return 0
     else
-        "${header[@]}" --msgbox "Oops! No Internet Connection available.\n\nConnect to Internet and try again later" 10 35
+        "${header[@]}" --msgbox "Oops! No Internet Connection available.\n\nConnect to Internet and try again later" 12 40
         mainmenu
     fi
 }
@@ -46,9 +46,8 @@ intro()
 }
 
 leavecols=$(($(($(tput cols) - 38)) / 2))
-fullpagewidth=$(tput cols)
 fullpageheight=$(($(tput lines) - 4 ))
-header=(dialog --begin 0 $leavecols --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
+header=(dialog --begin 0 "$leavecols" --keep-window --no-lines --no-shadow --infobox "█▀█ █▀▀ █░█ ▄▀█ █▄░█ █▀▀ █ █▀▀ █▄█\n█▀▄ ██▄ ▀▄▀ █▀█ █░▀█ █▄▄ █ █▀░ ░█░" 4 38 --and-widget)
 
 resourcemenu()
 {
@@ -57,16 +56,17 @@ resourcemenu()
     mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
     
     patches_latest="${revanced_latest[0]}"
-
-    cli_latest="${revanced_latest[1]}"
-
-    integrations_latest="${revanced_latest[2]}"
+    patches_size="$(numfmt --to=iec --format="%0.1f" "${revanced_latest[1]}")"
+    cli_latest="${revanced_latest[2]}"
+    cli_size="$(numfmt --to=iec --format="%0.1f" "${revanced_latest[3]}")"
+    integrations_latest="${revanced_latest[4]}"
+    integrations_size="$(numfmt --to=iec --format="%0.1f" "${revanced_latest[5]}")"
 
     ls ./revanced-patches* > /dev/null 2>&1 && patches_available=$(basename revanced-patches* .jar | cut -d '-' -f 3) || patches_available="Not-found"
     ls ./revanced-cli* > /dev/null 2>&1 && cli_available=$(basename revanced-cli* .jar | cut -d '-' -f 3) || cli_available="Not-found"
     ls ./revanced-integrations* > /dev/null 2>&1 && integrations_available=$(basename revanced-integrations* .apk | cut -d '-' -f 3) || integrations_available="Not-found"
     readarray -t resourcefilelines < <(echo -e "Resource Latest Downloaded\nPatches v$patches_latest $patches_available\nCLI v$cli_latest $cli_available\nIntegrations v$integrations_latest $integrations_available" | column -t -s ' ')
-    if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Current Source: $source\n\n${resourcefilelines[0]}\n${resourcefilelines[1]}\n${resourcefilelines[2]}\n${resourcefilelines[3]}\n\nDo you want to fetch latest resources?" "$fullpageheight" "$fullpagewidth"
+    if "${header[@]}" --begin 4 0 --title ' Resources List ' --no-items --defaultno --yes-label "Fetch" --no-label "Cancel" --keep-window --no-shadow --yesno "Current Source: $source\n\n${resourcefilelines[0]}\n${resourcefilelines[1]}\n${resourcefilelines[2]}\n${resourcefilelines[3]}\n\nDo you want to fetch latest resources?" "$fullpageheight" -1
     then
         [ "v$patches_latest" != "$patches_available" ] && rm revanced-patches* > /dev/null 2>&1
         [ "v$cli_latest" != "$cli_available" ] && rm revanced-cli* > /dev/null 2>&1
@@ -83,18 +83,15 @@ resourcemenu()
 
 getresources() 
 {
-    intro
-    echo "Fetching resources..."
-    echo ""
-    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-v"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: CLI\nVersion : $cli_latest\nSize    : $cli_size\n\nDownloading ..." 12 40
+    tput civis
     rm patches.json > /dev/null 2>&1
     wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/patches.json -O patches.json --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    echo ""
-    wget -q -c https://github.com/"$source"/revanced-cli/releases/download/v"$cli_latest"/revanced-cli-"$cli_latest"-all.jar -O revanced-cli-v"$cli_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    echo ""
-    wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-v"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    wget -q -c https://github.com/"$source"/revanced-patches/releases/download/v"$patches_latest"/revanced-patches-"$patches_latest".jar -O revanced-patches-v"$patches_latest".jar --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: Patches\nVersion : $patches_latest\nSize    : $patches_size\n\nDownloading ..." 12 40
+    tput civis
+    wget -q -c https://github.com/"$source"/revanced-integrations/releases/download/v"$integrations_latest"/app-release-unsigned.apk -O revanced-integrations-v"$integrations_latest".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "Resource: Integrations\nVersion : $integrations_latest\nSize    : $integrations_size\n\nDownloading ..." 12 40
+    tput civis
     python3 ./python-utils/sync-patches.py
-    echo ""
 }
 
 
@@ -103,7 +100,7 @@ changesource()
     internet
     source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
     allsources=($(jq -r '.[] | "\(.sourceMaintainer) \(.sourceStatus)"' sources.json))
-    selectedsource=$("${header[@]}" --begin 4 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" "$fullpageheight" "$fullpagewidth" 10 "${allsources[@]}" 2>&1> /dev/tty)
+    selectedsource=$("${header[@]}" --begin 4 0 --title ' Source Selection Menu ' --keep-window --no-items --no-shadow --no-cancel --ok-label "Done" --radiolist "Use arrow keys to navigate; Press Spacebar to select option" "$fullpageheight" -1 10 "${allsources[@]}" 2>&1> /dev/tty)
     tmp=$(mktemp)
     jq -r 'map(select(.).sourceStatus = "off")' sources.json | jq -r --arg selectedsource "$selectedsource" 'map(select(.sourceMaintainer == $selectedsource).sourceStatus = "on")' > "$tmp" && mv "$tmp" sources.json
     if [ "$source" != "$selectedsource" ]
@@ -113,7 +110,12 @@ changesource()
         rm revanced-* > /dev/null 2>&1
         rm patches.json > /dev/null 2>&1
         mapfile -t revanced_latest < <(python3 ./python-utils/revanced-latest.py)
-        patches_latest="${revanced_latest[0]}" && cli_latest="${revanced_latest[1]}" && integrations_latest="${revanced_latest[2]}"
+        patches_latest="${revanced_latest[0]}"
+        patches_size="$(numfmt --to=iec --format="%0.1f" "${revanced_latest[1]}")"
+        cli_latest="${revanced_latest[2]}"
+        cli_size="$(numfmt --to=iec --format="%0.1f"  "${revanced_latest[3]}")"
+        integrations_latest="${revanced_latest[4]}"
+        integrations_size="$(numfmt --to=iec --format="%0.1f" "${revanced_latest[5]}")"
         getresources
     fi
     mainmenu
@@ -122,7 +124,7 @@ changesource()
 selectapp()
 {
     readarray -t availableapps < <(jq -r 'map(select(.sourceStatus == "on"))[].availableApps[]' sources.json)
-    appname=$("${header[@]}" --begin 4 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" "$fullpageheight" "$fullpagewidth" 10 "${availableapps[@]}" 2>&1> /dev/tty)
+    appname=$("${header[@]}" --begin 4 0 --title ' App Selection Menu ' --no-items --keep-window --no-shadow --ok-label "Select" --menu "Use arrow keys to navigate" "$fullpageheight" -1 10 "${availableapps[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
@@ -152,7 +154,7 @@ selectpatches()
 {
     if ! ls ./patches* > /dev/null 2>&1
     then
-        "${header[@]}" --msgbox "No Json file found !!\nPlease update resources to edit patches." 10 35
+        "${header[@]}" --msgbox "No Json file found !!\nPlease update resources to edit patches." 12 40
         resourcemenu
         return 0
     fi
@@ -163,7 +165,7 @@ selectpatches()
     patchselectionheight=$(($(tput lines) - 5))
     declare -a patchesinfo
     readarray -t patchesinfo < <(jq -r --arg pkgname "$pkgname" 'map(select(.appname == $pkgname))[] | "\(.patchname)\n\(.status)\n\(.description)"' saved-patches.json)
-    choices=($("${header[@]}" --begin 4 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight "$fullpagewidth" 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
+    choices=($("${header[@]}" --begin 4 0 --title ' Patch Selection Menu ' --item-help --no-items --keep-window --no-shadow --help-button --help-label "Exclude all" --extra-button --extra-label "Include all" --ok-label "Save" --no-cancel --checklist "Use arrow keys to navigate; Press Spacebar to toogle patch" $patchselectionheight -1 10 "${patchesinfo[@]}" 2>&1 >/dev/tty))
     selectpatchstatus=$?
     patchsaver
 }
@@ -195,14 +197,14 @@ patchoptions()
     java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c -a ./noinput.apk -o nooutput.apk > /dev/null 2>&1
     tput cnorm
     tmp=$(mktemp)
-    "${header[@]}" --begin 4 0 --ok-label "Save" --cancel-label "Exit" --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml "$fullpageheight" "$fullpagewidth" 2> "$tmp" && mv "$tmp" ./options.toml
+    "${header[@]}" --begin 4 0 --ok-label "Save" --cancel-label "Exit" --keep-window --no-shadow --title ' Options File Editor ' --editbox options.toml "$fullpageheight" -1 2> "$tmp" && mv "$tmp" ./options.toml
     tput civis
     mainmenu
 }
 
 rootinstall()
 {   
-    "${header[@]}" --no-shadow --infobox "Installing $appname by Mounting" 10 35
+    "${header[@]}" --no-shadow --infobox "Installing $appname by Mounting" 12 40
     pkgname=$pkgname appname=$appname appver=$appver su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete &&\
     mv /data/local/tmp/revanced.delete /data/adb/revanced/"$pkgname".apk &&\
@@ -223,7 +225,7 @@ rootinstall()
 rootuninstall()
 {   
     selectapp
-    "${header[@]}" --no-shadow --infobox "Uninstalling $appname..." 10 35
+    "${header[@]}" --no-shadow --infobox "Uninstalling $appname..." 12 40
     pkgname=$pkgname su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     stockapp=$(pm path $pkgname | grep base | sed "s/package://g") &&\
     mount -o bind "$stockapp" "$stockapp" &&\
@@ -237,7 +239,6 @@ rootuninstall()
 nonrootinstall()
 {
     mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
-    [[ -f Vanced-MicroG.apk ]] && mv Vanced-MicroG.apk /storage/emulated/0/Revancify/ && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
     mainmenu
     return 0
@@ -260,7 +261,7 @@ checkpatched()
     then
         if ls ./"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" "$fullpageheight" "$fullpagewidth"
+            if "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Current directory already contains $appname Revanced version $appver. \n\n\nDo you want to patch $appname again?" "$fullpageheight" -1
             then
                 rm ./"$appname"Revanced-"$appver"*
             else
@@ -273,7 +274,7 @@ checkpatched()
     then
         if ls /storage/emulated/0/Revancify/"$appname"Revanced-"$appver"* > /dev/null 2>&1
         then
-            if ! "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" "$fullpageheight" "$fullpagewidth"
+            if ! "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" "$fullpageheight" -1
             then
                 nonrootinstall
             fi
@@ -295,25 +296,21 @@ sucheck()
 app_dl()
 {
     internet
-    readarray -t fetchlinkresponse < <( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
+    readarray -t fetchlinkresponse < <( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 12 40 0 >&2 ) 3>&1 )
     tput civis
-    applink="${fetchlinkresponse[0]}"
     echo "${fetchlinkresponse[1]}" > ."$appname"size
-    if [ "$applink" = "error" ]
+    if [ "${fetchlinkresponse[0]}" = "error" ]
     then
-        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
+        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 12 40
         mainmenu
         return 0
     fi
-    intro
-    echo "Downloading $appname-$appver.apk ..."
-    echo ""
-    wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    echo ""
+    wget -q -c "${fetchlinkresponse[0]}" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "App    : $appname\nVersion: $appver\nSize   : $(numfmt --to=iec --format="%0.1f" < ".${appname}size" )\n\nDownloading ..." 12 40
+    tput civis
     sleep 0.5s
     if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d $'\t' -f 1)" ]
     then
-        "${header[@]}" --msgbox "Oh No !!\nUnable to complete download. Please Check your internet connection." 10 35
+        "${header[@]}" --msgbox "Oh No !!\nUnable to complete download. Please Check your internet connection and Retry." 12 40
         mainmenu
     fi
         
@@ -322,13 +319,14 @@ app_dl()
 dlmicrog()
 {
 
-    if "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" "$fullpageheight" "$fullpagewidth"
+    if "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" "$fullpageheight" -1
     then
         intro
         internet
         echo "Downloading Vanced-MicroG.apk"
         echo ""
-        wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.224113-224113002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+        wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.224113-224113002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"  2>&1 | stdbuf -o0 cut -b 64-65 | dialog --gauge "App     : Vanced MicroG\nVersion : $cli_latest\nSize    : $(du -b revanced-cli* | cut -d $'\t' -f 1)\n\nDownloading ..." 10 30
+        [[ -f Vanced-MicroG.apk ]] && mv Vanced-MicroG.apk /storage/emulated/0/Revancify/ && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
     fi
     mainmenu
 }
@@ -359,10 +357,10 @@ versionselector()
     readarray -t appverlist < <(python3 ./python-utils/fetch-versions.py "$appname")
     if [ "${appverlist[0]}" = "error" ]
     then
-        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 10 35
+        "${header[@]}" --msgbox "Unable to fetch link !!\nThere is some problem with your internet connection. Disable VPN or Change your network." 12 40
         mainmenu
     fi
-    verchoosed=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" "$fullpageheight" "$fullpagewidth" 10 "${appverlist[@]}" 2>&1> /dev/tty)
+    verchoosed=$("${header[@]}" --begin 4 0 --title "Version Selection Menu" --no-items --keep-window --no-shadow --ok-label "Select" --menu "Choose App Version for $appname" "$fullpageheight" -1 10 "${appverlist[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     appver=$(echo "$verchoosed" | cut -d " " -f 1)
     if [ $exitstatus -ne 0 ]
@@ -404,7 +402,7 @@ patchapp()
     if ! grep -q "Finished" patchlog.txt
     then
         cp ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
-        "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder. Share the Patchlog to developer." 10 35
+        "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder. Share the Patchlog to developer." 12 40
         mainmenu
     fi
 }
@@ -414,7 +412,7 @@ checkmicrogpatch()
     microgstatus=$(jq -r --arg pkgname $pkgname 'map(select(.appname == $pkgname and (.patchname | test(".*microg.*"))))[].status' saved-patches.json)
     if [ "$microgstatus" = "on" ] && [ "$variant" = "root" ]
     then
-        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to exclude it or continue?" "$fullpageheight" "$fullpagewidth"
+        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Exclude" --yesno "You have a rooted device and you have included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to exclude it or continue?" "$fullpageheight" -1
         then
             return 0
         else
@@ -424,7 +422,7 @@ checkmicrogpatch()
         fi
     elif [ "$microgstatus" = "off" ] && [ "$variant" = "nonroot" ]
     then
-        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Include" --yesno "You have a non-rooted device and you have not included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to include it or continue?" "$fullpageheight" "$fullpagewidth"
+        if "${header[@]}" --begin 4 0 --title ' MicroG warning ' --no-items --defaultno --keep-window --no-shadow --yes-label "Continue" --no-label "Include" --yesno "You have a non-rooted device and you have not included microg-support patch. This may result in $appname app crash.\n\n\nDo you want to include it or continue?" "$fullpageheight" -1
         then
             return 0
         else
@@ -482,7 +480,7 @@ mainmenu()
         unset optionseditor
     fi
     [ "$variant" = "root" ] && misc=(6 "Uninstall Revanced app") || misc=(6 "Download Vanced Microg")
-    mainmenu=$("${header[@]}" --begin 4 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" "$fullpageheight" "$fullpagewidth" 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" "${misc[@]}" 2>&1> /dev/tty)
+    mainmenu=$("${header[@]}" --begin 4 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" "$fullpageheight" -1 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" "${misc[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
