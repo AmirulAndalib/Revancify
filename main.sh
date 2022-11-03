@@ -202,7 +202,7 @@ patchoptions()
 
 rootinstall()
 {   
-    "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
+    "${header[@]}" --no-shadow --infobox "Installing $appname by Mounting" 10 35
     pkgname=$pkgname appname=$appname appver=$appver su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete &&\
     mv /data/local/tmp/revanced.delete /data/adb/revanced/"$pkgname".apk &&\
@@ -223,7 +223,7 @@ rootinstall()
 rootuninstall()
 {   
     selectapp
-    "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
+    "${header[@]}" --no-shadow --infobox "Uninstalling $appname..." 10 35
     pkgname=$pkgname su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     stockapp=$(pm path $pkgname | grep base | sed "s/package://g") &&\
     mount -o bind "$stockapp" "$stockapp" &&\
@@ -231,7 +231,7 @@ rootuninstall()
     rm /data/adb/service.d/mount_revanced_$pkgname.sh &&\
     rm -rf /data/adb/revanced/$pkgname.apk' > /dev/null 2>&1
     su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n" > /dev/null 2>&1
-    mainmenu
+    su -c 'pidof com.termux | xargs kill -9'
 }
 
 nonrootinstall()
@@ -481,7 +481,7 @@ mainmenu()
     else
         unset optionseditor
     fi
-    [ "$variant" = "root" ] && misc=(6 "Uninstall Revanced App") || misc=(6 "Download Vanced Microg")
+    [ "$variant" = "root" ] && misc=(6 "Uninstall Revanced app") || misc=(6 "Download Vanced Microg")
     mainmenu=$("${header[@]}" --begin 4 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" "$fullpageheight" "$fullpagewidth" 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" "${misc[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
