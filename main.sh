@@ -200,7 +200,7 @@ patchoptions()
     mainmenu
 }
 
-mountapk()
+rootinstall()
 {   
     "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
     pkgname=$pkgname appname=$appname appver=$appver su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
@@ -220,19 +220,27 @@ mountapk()
     su -c 'pidof com.termux | xargs kill -9'
 }
 
-moveapk()
+rootuninstall()
+{   
+    selectapp
+    "${header[@]}" --no-shadow --infobox "Unmounting and Mouting $appname...\nThis may take a while..." 10 35
+    pkgname=$pkgname su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
+    stockapp=$(pm path $pkgname | grep base | sed "s/package://g") &&\
+    mount -o bind "$stockapp" "$stockapp" &&\
+    am force-stop $pkgname &&\
+    rm /data/adb/service.d/mount_revanced_$pkgname.sh &&\
+    rm -rf /data/adb/revanced/$pkgname.apk' > /dev/null 2>&1
+    su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n" > /dev/null 2>&1
+    mainmenu
+}
+
+nonrootinstall()
 {
     mv "$appname"Revanced* /storage/emulated/0/Revancify/ > /dev/null 2>&1
     [[ -f Vanced-MicroG.apk ]] && mv Vanced-MicroG.apk /storage/emulated/0/Revancify/ && termux-open /storage/emulated/0/Revancify/Vanced-MicroG.apk
     termux-open /storage/emulated/0/Revancify/"$appname"Revanced-"$appver".apk
     mainmenu
     return 0
-}
-
-promptmicrog()
-{
-    "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" "$fullpageheight" "$fullpagewidth"
-    dlexit=$?
 }
 
 checkresources()
@@ -256,7 +264,7 @@ checkpatched()
             then
                 rm ./"$appname"Revanced-"$appver"*
             else
-                mountapk
+                rootinstall
             fi
         else
             rm ./"$appname"Revanced-* > /dev/null 2>&1
@@ -267,7 +275,7 @@ checkpatched()
         then
             if ! "${header[@]}" --begin 4 0 --title ' Patched APK found ' --no-items --defaultno --keep-window --no-shadow --yesno "Patched $appname with version $appver already exists. \n\n\nDo you want to patch $appname again?" "$fullpageheight" "$fullpagewidth"
             then
-                moveapk
+                nonrootinstall
             fi
         fi
     fi
@@ -303,10 +311,10 @@ app_dl()
         return 0
     fi
     intro
-    echo "$appname-$appver.apk already exists."
+    echo "Downloading $appname-$appver.apk ..."
     echo ""
-    sleep 0.5s
     wget -q -c "$applink" -O "$appname"-"$appver".apk --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    echo ""
     sleep 0.5s
     if [ "$(cat ."$appname"size)" != "$(du -b "$appname"-"$appver".apk | cut -d $'\t' -f 1)" ]
     then
@@ -318,13 +326,16 @@ app_dl()
 
 dlmicrog()
 {
-    if [ "$dlexit" -eq 0 ] > /dev/null 2>&1
+
+    if "${header[@]}" --begin 4 0 --title ' MicroG Prompt ' --no-items --defaultno --keep-window --no-shadow --yesno "Vanced MicroG is used to run MicroG services without root.\nYouTube and YTMusic won't work without it.\nIf you already have MicroG, You don't need to download it.\n\n\n\n\n\nDo you want to download Vanced MicroG app?" "$fullpageheight" "$fullpagewidth"
     then
+        intro
         internet
         echo "Downloading Vanced-MicroG.apk"
+        echo ""
         wget -q -c "https://github.com/inotia00/VancedMicroG/releases/download/v0.2.25.224113-224113002/microg.apk" -O "Vanced-MicroG.apk" --show-progress --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     fi
-    tput rc; tput ed
+    mainmenu
 }
 
 setargs()
@@ -439,33 +450,24 @@ buildapp()
         internet
         python3 ./python-utils/sync-patches.py
     fi
-    if [ "$pkgname" = "com.google.android.youtube" ] || [ "$pkgname" = "com.google.android.apps.youtube.music" ]
+    sucheck
+    if [ "$variant" = "root" ]
     then
-        sucheck
-        if [ "$variant" = "root" ]
-        then
-            appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p')
-        elif [ "$variant" = "nonroot" ]
-        then
-            versionselector
-            dlmicrog
-        fi
-        checkmicrogpatch
-        fetchapk
-        patchapp
-        if [ "$variant" = "root" ]
-        then
-            mountapk
-        elif [ "$variant" = "nonroot" ]
-        then
-            moveapk
-        fi
-
-    else
+        appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p')
+    elif [ "$variant" = "nonroot" ]
+    then
         versionselector
-        fetchapk
-        patchapp
-        moveapk
+        dlmicrog
+    fi
+    checkmicrogpatch
+    fetchapk
+    patchapp
+    if [ "$variant" = "root" ]
+    then
+        rootinstall
+    elif [ "$variant" = "nonroot" ]
+    then
+        nonrootinstall
     fi
 }
 
@@ -480,7 +482,8 @@ mainmenu()
     else
         unset optionseditor
     fi
-    mainmenu=$("${header[@]}" --begin 4 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" "$fullpageheight" "$fullpagewidth" 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" 2>&1> /dev/tty)
+    [ "$variant" = "root" ] && misc=(6 "Uninstall Revanced App") || misc=(6 "Download Vanced Microg")
+    mainmenu=$("${header[@]}" --begin 4 0 --title ' Select App ' --keep-window --no-shadow --ok-label "Select" --cancel-label "Exit" --menu "Use arrow keys to navigate" "$fullpageheight" "$fullpagewidth" 10 1 "Patch App" 2 "Select Patches" 3 "Change Source" 4 "Check Resources" "${optionseditor[@]}" "${misc[@]}" 2>&1> /dev/tty)
     exitstatus=$?
     if [ $exitstatus -eq 0 ]
     then
@@ -500,6 +503,15 @@ mainmenu()
         elif [ "$mainmenu" -eq 5 ]
         then
             patchoptions
+        elif [ "$mainmenu" -eq 6 ]
+        then
+            if [ "$variant" = "root" ]
+            then
+                rootuninstall
+            elif [ "$variant" = "nonroot" ]
+            then
+                dlmicrog
+            fi
         fi
     elif [ $exitstatus -ne 0 ]
     then
