@@ -384,7 +384,6 @@ fetchapk()
         app_dl
     fi
     apkargs="-a $appname-$appver.apk -o ${appname}Revanced-$appver.apk"
-    dlmicrog
 }
 
 
