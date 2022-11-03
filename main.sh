@@ -369,7 +369,7 @@ versionselector()
 fetchapk()
 {
     checkpatched
-    if [ "$([ -f ."$appname"size ] && cat ."$appname"size)" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d " " -f 1)" ]
+    if [ "$([ -f ."$appname"size ] && cat ."$appname"size || echo "0" )" != "$([ -f "$appname"-"$appver".apk ] && du -b "$appname"-"$appver".apk | cut -d " " -f 1 || echo "None")" ]
     then
         internet
         readarray -t fetchlinkresponse < <( ( python3 ./python-utils/fetch-link.py "$appname" "$appver" "$arch" 2>&3 | "${header[@]}" --gauge "App    : $appname\nVersion: $appver\n\nScraping Download Link..." 10 35 0 >&2 ) 3>&1 )
