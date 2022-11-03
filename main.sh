@@ -287,11 +287,6 @@ sucheck()
     then
         variant=root
         su -c "mkdir -p /data/adb/revanced"
-        if ! PKGNAME=$pkgname su -c 'dumpsys package $PKGNAME | grep path' > /dev/null 2>&1
-        then 
-            termux-open "https://play.google.com/store/apps/details?id="$pkgname
-            mainmenu
-        fi
     else
         variant=nonroot
     fi
@@ -450,14 +445,17 @@ buildapp()
         internet
         python3 ./python-utils/sync-patches.py
     fi
-    sucheck
     if [ "$variant" = "root" ]
     then
+        if ! su -c "pm path $pkgname" > /dev/null 2>&1
+        then 
+            termux-open "https://play.google.com/store/apps/details?id="$pkgname
+            mainmenu
+        fi
         appver=$(su -c dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p')
     elif [ "$variant" = "nonroot" ]
     then
         versionselector
-        dlmicrog
     fi
     checkmicrogpatch
     fetchapk
@@ -472,6 +470,7 @@ buildapp()
 }
 
 setup
+sucheck
 mainmenu()
 {
     source=$(jq -r 'map(select(.sourceStatus == "on"))[].sourceMaintainer' sources.json)
@@ -500,10 +499,10 @@ mainmenu()
         elif [ "$mainmenu" -eq "4" ]
         then
             resourcemenu
-        elif [ "$mainmenu" -eq 5 ]
+        elif [ "$mainmenu" -eq "5" ]
         then
             patchoptions
-        elif [ "$mainmenu" -eq 6 ]
+        elif [ "$mainmenu" -eq "6" ]
         then
             if [ "$variant" = "root" ]
             then
