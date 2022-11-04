@@ -247,9 +247,8 @@ rootuninstall()
     "${header[@]}" --no-shadow --infobox "Uninstalling $appname Revanced by Unmounting..." 12 40
     pkgname=$pkgname su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     stockapp=$(pm path $pkgname | grep base | sed "s/package://g") &&\
-    mount -o bind "$stockapp" "$stockapp" &&\
     am force-stop $pkgname &&\
-    rm /data/adb/service.d/mount_revanced_$pkgname.sh
+    rm /data/adb/service.d/mount_revanced_$pkgname.sh &&\
     rm -rf /data/adb/revanced/$pkgname.apk' > /dev/null 2>&1
     if ! su -c "grep -q $pkgname /proc/mounts"
     then
