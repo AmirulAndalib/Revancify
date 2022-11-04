@@ -211,7 +211,7 @@ patchoptions()
 
 rootinstall()
 {   
-    "${header[@]}" --no-shadow --infobox "Installing $appname by Mounting" 12 40
+    "${header[@]}" --no-shadow --infobox "Installing $appname by Mounting..." 12 40
     pkgname=$pkgname appname=$appname appver=$appver su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     cp /data/data/com.termux/files/home/storage/Revancify/"$appname"Revanced-"$appver".apk /data/local/tmp/revanced.delete &&\
     mv /data/local/tmp/revanced.delete /data/adb/revanced/"$pkgname".apk &&\
@@ -221,7 +221,14 @@ rootinstall()
     chown system:system "$revancedapp" &&\
     chcon u:object_r:apk_data_file:s0 "$revancedapp" &&\
     mount -o bind "$revancedapp" "$stockapp" &&\
-    am force-stop $pkgname' > /dev/null 2>&1
+    am force-stop $pkgname' 2>&1 ./.mountlog
+    if ! su -c "grep -q $pkgname /proc/mounts"
+    then
+        "${header[@]}" --no-shadow --infobox "Installation Failed !!\nLogs saved to Revancify folder. Share the Mountlog to developer." 12 40
+        cp ./.mountlog /storage/emulated/0/Revancify/mountlog.txt
+        sleep 1
+        mainmenu
+    fi
     echo -e "#!/system/bin/sh\nwhile [ \"\$(getprop sys.boot_completed | tr -d '\\\r')\" != \"1\" ]; do sleep 1; done\n\nif [ \$(dumpsys package $pkgname | grep versionName | cut -d= -f 2 | sed -n '1p') =  \"$appver\" ]\nthen\n\tbase_path=\"/data/adb/revanced/$pkgname.apk\"\n\tstock_path=\$( pm path $pkgname | grep base | sed 's/package://g' )\n\n\tchcon u:object_r:apk_data_file:s0 \$base_path\n\tmount -o bind \$base_path \$stock_path\nfi" > ./mount_revanced_$pkgname.sh
     su -c "mv mount_revanced_$pkgname.sh /data/adb/service.d && chmod +x /data/adb/service.d/mount_revanced_$pkgname.sh"
     sleep 1
@@ -232,15 +239,26 @@ rootinstall()
 rootuninstall()
 {   
     selectapp
-    "${header[@]}" --no-shadow --infobox "Uninstalling $appname..." 12 40
+    if ! su -c "grep -q $pkgname /proc/mounts"
+    then
+        "${header[@]}" --msgbox "$appname Revanced is not installed(mounted) in your device." 12 40
+        mainmenu
+    fi
+    "${header[@]}" --no-shadow --infobox "Uninstalling $appname Revanced by Unmounting..." 12 40
     pkgname=$pkgname su -mm -c 'grep $pkgname /proc/mounts | while read -r line; do echo $line | cut -d " " -f 2 | sed "s/apk.*/apk/" | xargs -r umount -l > /dev/null 2>&1; done &&\
     stockapp=$(pm path $pkgname | grep base | sed "s/package://g") &&\
     mount -o bind "$stockapp" "$stockapp" &&\
     am force-stop $pkgname &&\
     rm /data/adb/service.d/mount_revanced_$pkgname.sh &&\
     rm -rf /data/adb/revanced/$pkgname.apk' > /dev/null 2>&1
-    su -c "pm resolve-activity --brief $pkgname | tail -n 1 | xargs am start -n" > /dev/null 2>&1
-    su -c 'pidof com.termux | xargs kill -9'
+    if ! su -c "grep -q $pkgname /proc/mounts"
+    then
+        "${header[@]}" --no-shadow --infobox "Uninstall Successful !!" 12 40
+        sleep 1
+        mainmenu
+    else
+        "${header[@]}" --no-shadow --infobox "Uninstall failed !! Something went wrong." 12 40
+    fi
 }
 
 nonrootinstall()
@@ -400,12 +418,12 @@ patchapp()
     intro
     setargs
     echo "Patching $appname..."
-    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive 2>&1 | tee ./patchlog.txt
+    java -jar ./revanced-cli*.jar -b ./revanced-patches*.jar -m ./revanced-integrations*.apk -c $apkargs $includepatches --keystore ./revanced.keystore $riplibs --custom-aapt2-binary ./binaries/aapt2_"$arch" $optionsarg --experimental --exclusive 2>&1 | tee ./.patchlog
     sleep 2
-    if ! grep -q "Finished" patchlog.txt
+    if ! grep -q "Finished" .patchlog
     then
-        cp ./patchlog.txt /storage/emulated/0/Revancify/crashlog.txt
-        "${header[@]}" --msgbox "Oops, Patching failed !!\nPatchlog saved to Revancify folder. Share the Patchlog to developer." 12 40
+        cp ./.patchlog /storage/emulated/0/Revancify/patchlog.txt
+        "${header[@]}" --msgbox "Oops, Patching failed !!\nLog file saved to Revancify folder. Share the Patchlog to developer." 12 40
         mainmenu
     fi
 }
