@@ -258,6 +258,8 @@ rootuninstall()
         mainmenu
     else
         "${header[@]}" --no-shadow --infobox "Uninstall failed !! Something went wrong." 12 40
+        sleep 1
+        mainmenu
     fi
 }
 
