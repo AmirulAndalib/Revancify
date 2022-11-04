@@ -250,6 +250,7 @@ rootuninstall()
     am force-stop $pkgname &&\
     rm /data/adb/service.d/mount_revanced_$pkgname.sh &&\
     rm -rf /data/adb/revanced/$pkgname.apk' > /dev/null 2>&1
+    sleep 0.5s
     if ! su -c "grep -q $pkgname /proc/mounts"
     then
         "${header[@]}" --no-shadow --infobox "Uninstall Successful !!" 12 40
