@@ -249,7 +249,7 @@ rootuninstall()
     stockapp=$(pm path $pkgname | grep base | sed "s/package://g") &&\
     mount -o bind "$stockapp" "$stockapp" &&\
     am force-stop $pkgname &&\
-    rm /data/adb/service.d/mount_revanced_$pkgname.sh &&\
+    rm /data/adb/service.d/mount_revanced_$pkgname.sh
     rm -rf /data/adb/revanced/$pkgname.apk' > /dev/null 2>&1
     if ! su -c "grep -q $pkgname /proc/mounts"
     then
